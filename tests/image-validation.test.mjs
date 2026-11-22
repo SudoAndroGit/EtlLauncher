@@ -7,7 +7,9 @@ import {
 } from '../branding/image-validation.ts'
 
 function pngHeader(width, height) {
-  const bytes = Buffer.alloc(33)
+  // Header + empty IDAT chunk + IEND: structurally valid chunk framing.
+  // Decoder tests are separate; these test the pre-decode header inspector.
+  const bytes = Buffer.alloc(57)
   Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(bytes)
   bytes.writeUInt32BE(13, 8)
   bytes.write('IHDR', 12)
@@ -15,6 +17,8 @@ function pngHeader(width, height) {
   bytes.writeUInt32BE(height, 20)
   bytes[24] = 8
   bytes[25] = 6
+  bytes.write('IDAT', 37)
+  bytes.write('IEND', 49)
   return bytes
 }
 function gifHeader(width = 1, height = 1) {
@@ -64,6 +68,18 @@ test('reject unsupported or unrecognized content', async () => {
   await assert.rejects(
     inspectEternalImage(new Blob([Buffer.from('<svg/>')]), 'cute.svg'),
     /Utiliza un archivo/,
+  )
+})
+test('reject animated PNGs that bypass GIF frame limits', async () => {
+  const image = pngHeader(64, 64)
+  const animation = Buffer.alloc(20)
+  animation.writeUInt32BE(8, 0)
+  animation.write('acTL', 4)
+  animation.writeUInt32BE(2, 8)
+  const apng = Buffer.concat([image.subarray(0, 33), animation, image.subarray(33)])
+  await assert.rejects(
+    inspectEternalImage(new Blob([apng], { type: 'image/png' }), 'animated.png'),
+    /PNG animado no admitido/,
   )
 })
 test('reject still images over 16 megapixels even if they fit by file size', async () => {
