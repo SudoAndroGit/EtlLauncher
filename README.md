@@ -21,6 +21,38 @@ El tema se aplica automáticamente en cada compilación usando `branding/theme.c
 
 Para deshacer este aspecto, basta con revertir los cambios CSS de `branding/theme.css`; no afecta a instancias, mods o partidas. La apariencia definitiva aún debe revisarse en Windows después de que el workflow compile.
 
+## Fondo personalizado 🌸
+
+En **Ajustes → Apariencia → Fondo de Eternal** puedes seleccionar un JPG, PNG o WebP de hasta 12 MB y restaurar el fondo Sakura Glass cuando quieras.
+
+La fotografía se **reduce localmente** a un máximo aproximado de 1920×1080 y se guarda comprimida en el almacenamiento local del WebView. No se sube a ningún servicio, no se añaden permisos de acceso a archivos y no cambia tus instalaciones. El fondo Sakura Glass original es el predeterminado. Si se borran los datos del WebView, la personalización se perderá.
+
+## Noticias remotas (sin actualizar el ejecutable)
+
+El panel lateral carga noticias desde un archivo JSON público por HTTPS. Consulta al abrir y cada 15 minutos mientras esté abierto; permite actualización manual. Guarda un caché local con las últimas noticias válidas. Sin URL configurada, sin conexión o sin datos en caché, aparece la bienvenida incluida en el instalador.
+
+### Publicarlo con Cloudflare Pages
+
+1. Crea un proyecto **Cloudflare Pages** conectado a este repositorio privado de GitHub (el sitio publicado será público).
+2. Selecciona la rama `main`, **sin comando de compilación**, y establece **`public-news` como directorio de salida**. El archivo `public-news/_headers` configura CORS y un tiempo corto de caché.
+3. Abre la URL generada por Pages, por ejemplo `https://TU-PROYECTO.pages.dev/news.json`, y verifica que responde con JSON válido. También puedes utilizar un dominio personalizado propio.
+4. Edita **`branding/news-config.json`** y pega la URL pública completa en el campo `url`. Compila **una vez**; el parche permite ese origen HTTPS en la política CSP de Tauri.
+5. Para publicar noticias futuras, **solo edita `public-news/news.json`**. Cloudflare Pages publicará el JSON y los EternalLauncher instalados recibirán los cambios en su próxima consulta; no necesitan recompilarse.
+
+Formato del archivo: `{ "version": 1, "updated_at": "AAAA-MM-DD", "items": [{ "id": "novedad", "title": "Título", "body": "Contenido de texto", "date": "AAAA-MM-DD", "url": "https://enlace-opcional" }] }`.
+
+Las noticias se muestran como **texto plano**, nunca HTML, con máximo cinco entradas, límites de tamaño, enlaces HTTPS y consulta de red con timeout. No requiere cuentas, tokens, base de datos ni servidor propio. **Hasta configurar y publicar una URL real, las noticias remotas no están activas**; la bienvenida de Eternal permanece.
+
+## Rendimiento del workflow
+
+El workflow conserva la optimización anterior que **salta versiones de Modrinth ya compiladas**, y ahora también:
+
+- Conserva las descargas de **pnpm** mediante `actions/cache@v4`.
+- Reutiliza compilaciones de dependencias **Rust/Cargo** mediante `Swatinem/rust-cache@v2`.
+- Escribe en el **resumen de GitHub Actions** el tiempo real de instalación de pnpm y compilación Tauri/NSIS, además del acierto de caché pnpm.
+
+La primera compilación que crea las cachés puede tardar lo mismo o más. Las mejoras reales deben comprobarse en la segunda ejecución comparable. No se ha medido todavía un tiempo de referencia confiable ni se garantiza una reducción concreta.
+
 ## Cambios de interfaz y privacidad
 
 - Oculta la entrada de **Modrinth Hosting** del menú lateral. Mantiene las APIs necesarias para instalaciones, descargas y funciones online; **no** modifica el servicio de pago ni elimina todo el código de Hosting.
@@ -68,7 +100,10 @@ En **Run workflow**, marca **Publish a private GitHub Release after the build su
 - `patches/privacy_launcher.py`: privacidad de la compilación.
 - `branding/logo.png.b64`: logo transparente para el compilador.
 - `branding/theme.css`: tema Sakura Glass (CSS únicamente, sin motor de temas).
-- `branding/welcome.json` y `branding/welcome-sidebar.vue`: contenido editable de bienvenida.
+- `branding/welcome.json`, `branding/welcome-sidebar.vue` y `branding/news-config.json`: bienvenida y noticias remotas.
+- `public-news/news.json` y `public-news/_headers`: archivos listos para publicar en Cloudflare Pages.
+- `branding/wallpaper.ts`, `branding/wallpaper-settings.vue`: selección y persistencia local del fondo.
+- `patches/wallpaper_news_launcher.py`: añade la opción de fondo a Apariencia y configura el origen HTTPS de noticias.
 
 ## Avisos y compatibilidad
 
