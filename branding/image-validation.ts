@@ -142,7 +142,9 @@ function gifDetails(bytes: Uint8Array): ValidatedImage {
     if (!frameWidth || !frameHeight || left + frameWidth > width || top + frameHeight > height) {
       fail('Fotograma GIF fuera del área visible.')
     }
-    totalPixels += frameWidth * frameHeight
+    // Count the full GIF canvas for each frame: decoders may retain fully
+    // composited frames even when only a tiny sub-rectangle changes.
+    totalPixels += width * height
     if (++frames > MAX_GIF_FRAMES || totalPixels > MAX_GIF_FRAME_PIXELS) {
       fail('GIF demasiado largo o pesado (máximo 150 fotogramas y 100 millones de píxeles acumulados).')
     }
