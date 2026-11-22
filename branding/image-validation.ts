@@ -208,7 +208,7 @@ async function decodeImage(file: Blob, expected: ValidatedImage): Promise<void> 
  * Validates signature, real format vs extension, dimensions, frame budget and
  * ability to decode. The filename is required for local & remote uploads.
  */
-export async function validateEternalImage(file: Blob, filename: string): Promise<ValidatedImage> {
+export async function inspectEternalImage(file: Blob, filename: string): Promise<ValidatedImage> {
   if (!file.size || file.size > MAX_IMAGE_BYTES) {
     fail('El archivo debe ocupar como máximo 22 MB.')
   }
@@ -240,6 +240,12 @@ export async function validateEternalImage(file: Blob, filename: string): Promis
     checkDimensions(mime, dimensions.width, dimensions.height)
     result = { mime, ...dimensions, frames: 1 }
   }
+  return result
+}
+
+/** Full browser-side validation including an actual decoder pass. */
+export async function validateEternalImage(file: Blob, filename: string): Promise<ValidatedImage> {
+  const result = await inspectEternalImage(file, filename)
   await decodeImage(file, result)
   return result
 }
