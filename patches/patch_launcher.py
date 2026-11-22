@@ -48,8 +48,8 @@ def main() -> None:
     utils = ROOT / "apps/app-frontend/src/helpers/utils.js"
     replace_once(
         utils,
-        "export async function areUpdatesEnabled() {\\n\\treturn await invoke('are_updates_enabled')\\n}",
-        "export async function areUpdatesEnabled() {\\n\\treturn false\\n}",
+        "export async function areUpdatesEnabled() {\n\treturn await invoke('are_updates_enabled')\n}",
+        "export async function areUpdatesEnabled() {\n\treturn false\n}",
     )
     print("EtlLauncher name, ad UI and updater patch applied.")
     print("Note: backend ad code remains; this is NOT a complete removal of ad infrastructure.")
