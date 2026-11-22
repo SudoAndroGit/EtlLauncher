@@ -76,13 +76,13 @@
     radial-gradient(ellipse at 82% 8%, rgba(245, 169, 197, .19), transparent 43%),
     radial-gradient(ellipse at 16% 83%, rgba(181, 130, 199, .15), transparent 48%),
     linear-gradient(145deg, #211922 0%, #18141e 48%, #281d29 100%);
-  --eternal-glass-navbar: rgba(43, 28, 44, .83);
-  --eternal-glass-titlebar: rgba(49, 30, 47, .84);
-  --eternal-glass-sidebar: rgba(59, 34, 55, .80);
-  --eternal-glass-content: rgba(27, 21, 30, .69);
-  --eternal-glass-card: rgba(75, 45, 69, .67);
-  --eternal-glass-shine: rgba(255, 229, 241, .10);
-  --eternal-glass-outline: rgba(255, 205, 227, .20);
+  --eternal-glass-navbar: rgba(46, 29, 48, .70);
+  --eternal-glass-titlebar: rgba(54, 34, 53, .66);
+  --eternal-glass-sidebar: rgba(58, 34, 55, .69);
+  --eternal-glass-content: rgba(27, 19, 30, .48);
+  --eternal-glass-card: rgba(67, 39, 65, .60);
+  --eternal-glass-shine: rgba(255, 246, 252, .16);
+  --eternal-glass-outline: rgba(255, 239, 250, .27);
   --eternal-glass-outline-hover: rgba(250, 178, 213, .47);
   --eternal-glass-shadow: rgba(16, 7, 20, .45);
   --eternal-glass-nav-selected: rgba(241, 158, 196, .26);
@@ -100,11 +100,11 @@
     radial-gradient(ellipse at 82% 5%, rgba(245, 162, 198, .26), transparent 45%),
     radial-gradient(ellipse at 12% 87%, rgba(198, 162, 222, .22), transparent 50%),
     linear-gradient(145deg, #fff5fa 0%, #f8eaf3 55%, #fff2f7 100%);
-  --eternal-glass-navbar: rgba(255, 246, 252, .84);
-  --eternal-glass-titlebar: rgba(255, 242, 249, .86);
-  --eternal-glass-sidebar: rgba(255, 241, 249, .85);
-  --eternal-glass-content: rgba(255, 249, 252, .64);
-  --eternal-glass-card: rgba(255, 249, 253, .84);
+  --eternal-glass-navbar: rgba(255, 247, 252, .78);
+  --eternal-glass-titlebar: rgba(255, 246, 251, .77);
+  --eternal-glass-sidebar: rgba(255, 242, 251, .77);
+  --eternal-glass-content: rgba(255, 248, 252, .59);
+  --eternal-glass-card: rgba(255, 247, 253, .81);
   --eternal-glass-shine: rgba(255, 255, 255, .86);
   --eternal-glass-outline: rgba(193, 109, 151, .24);
   --eternal-glass-outline-hover: rgba(180, 81, 133, .52);
@@ -147,11 +147,11 @@
  * Use the existing active-state pseudo-element, preserving focus/keyboard flow.
  */
 .app-grid-navbar .nav-button {
-  border-radius: 14px !important;
+  border-radius: 17px !important;
 }
 
 .app-grid-navbar .nav-button::before {
-  border-radius: 14px !important;
+  border-radius: 17px !important;
 }
 
 .app-grid-navbar .nav-button:hover:not(:disabled) {
@@ -174,10 +174,11 @@
     var(--eternal-glass-card) 58%
   ) !important;
   border-color: var(--eternal-glass-outline) !important;
-  border-radius: 18px !important;
+  border-radius: 22px !important;
   box-shadow:
-    0 8px 20px -13px var(--eternal-glass-shadow),
-    inset 0 1px 0 var(--eternal-glass-shine);
+    0 10px 22px -13px var(--eternal-glass-shadow),
+    inset 0 1px 0 var(--eternal-glass-shine),
+    inset 1px 0 0 rgba(255, 255, 255, .055);
 }
 
 .app-contents [data-library-instance-card]:hover {
@@ -231,5 +232,132 @@
     border-color: CanvasText !important;
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
+  }
+}
+
+/* === Sakura Glass refinement: rounded controls and white glass highlights ===
+ * CSS-only. No new font, markup, text, event handler, or theme engine.
+ * Never blur individual library items: large libraries stay lightweight.
+ */
+:root {
+  --eternal-glass-white-reflection: rgba(255, 255, 255, .16);
+  --eternal-glass-soft-reflection: rgba(255, 255, 255, .075);
+  --eternal-glass-rose-halo: rgba(255, 171, 218, .13);
+}
+
+:root.light-mode,
+.light-mode,
+:root.light,
+.light {
+  --eternal-glass-white-reflection: rgba(255, 255, 255, .78);
+  --eternal-glass-soft-reflection: rgba(255, 255, 255, .50);
+  --eternal-glass-rose-halo: rgba(218, 117, 171, .08);
+}
+
+/* Sheen is a static gradient on top of each panel's translucent background. */
+.app-grid-layout .app-grid-navbar {
+  background:
+    linear-gradient(165deg, var(--eternal-glass-white-reflection), transparent 58%),
+    var(--eternal-glass-navbar) !important;
+  box-shadow:
+    inset 1px 0 0 var(--eternal-glass-white-reflection),
+    inset -1px 0 0 var(--eternal-glass-soft-reflection),
+    5px 0 24px -20px var(--eternal-glass-shadow);
+}
+
+.app-grid-layout .app-title-bar {
+  background:
+    linear-gradient(180deg, var(--eternal-glass-white-reflection), transparent 86%),
+    var(--eternal-glass-titlebar) !important;
+  box-shadow:
+    inset 0 1px 0 var(--eternal-glass-white-reflection),
+    0 8px 20px -19px var(--eternal-glass-shadow);
+}
+
+.app-contents .app-sidebar {
+  background:
+    linear-gradient(145deg, var(--eternal-glass-white-reflection), transparent 68%),
+    var(--eternal-glass-sidebar) !important;
+  box-shadow:
+    inset 1px 0 0 var(--eternal-glass-white-reflection),
+    -8px 0 24px -22px var(--eternal-glass-shadow);
+}
+
+.app-contents.app-contents {
+  box-shadow: inset 0 1px 0 var(--eternal-glass-soft-reflection);
+}
+
+/* Only standard Modrinth buttons; exclude intentional circular icon buttons.
+ * Focus rings, sizes, disabled states, and icon placement remain upstream.
+ */
+.app-contents [data-button]:not([class*="rounded-full"]),
+.app-grid-layout .app-title-bar [data-button]:not([class*="rounded-full"]) {
+  border-radius: 16px !important;
+}
+
+.app-contents [data-button].button-frame--base:not([class*="rounded-full"]),
+.app-contents [data-button].button-frame--colored-text:not([class*="rounded-full"]),
+.app-grid-layout .app-title-bar [data-button].button-frame--base:not([class*="rounded-full"]) {
+  box-shadow:
+    inset 0 1px 0 var(--eternal-glass-white-reflection),
+    0 0 0 1px var(--eternal-glass-outline),
+    0 5px 15px -11px var(--eternal-glass-shadow);
+}
+
+.app-contents [data-button].button-frame--colored:not([class*="rounded-full"]) {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -1px 0 rgba(84,25,68,.14),
+    0 0 0 1px rgba(255, 247, 252, .45),
+    0 8px 22px -10px var(--eternal-glass-rose-halo);
+}
+
+.app-contents [data-button].button-frame--colored:not([class*="rounded-full"]):hover:not(:disabled) {
+  filter: brightness(1.055);
+}
+
+/* Recent "Continue" cards share the lightweight, glossy library-card finish. */
+.app-contents .clickable-card {
+  border-radius: 22px !important;
+  background:
+    linear-gradient(150deg, var(--eternal-glass-white-reflection), transparent 54%),
+    var(--eternal-glass-card) !important;
+  border-color: var(--eternal-glass-outline) !important;
+  box-shadow:
+    inset 0 1px 0 var(--eternal-glass-white-reflection),
+    0 10px 24px -17px var(--eternal-glass-shadow);
+}
+
+.app-contents .clickable-card:hover {
+  border-color: var(--eternal-glass-outline-hover) !important;
+}
+
+/* Existing welcome, account and form surfaces get slightly softer corners. */
+.app-sidebar .eternal-welcome-card {
+  border-radius: 22px !important;
+  box-shadow:
+    inset 0 1px 0 var(--eternal-glass-white-reflection),
+    0 12px 26px -18px var(--eternal-glass-shadow);
+}
+
+.app-contents :is(input, textarea, select):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+.app-contents .eternal-wallpaper-actions button {
+  border-radius: 15px !important;
+}
+
+/* Do not animate decorative shadows or increase per-card blur. */
+@media (prefers-reduced-transparency: reduce) {
+  .app-grid-layout .app-grid-navbar,
+  .app-grid-layout .app-title-bar,
+  .app-contents .app-sidebar,
+  .app-contents .clickable-card {
+    background-image: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .app-contents .clickable-card {
+    background: Canvas !important;
+    border-color: CanvasText !important;
+    box-shadow: none !important;
   }
 }
