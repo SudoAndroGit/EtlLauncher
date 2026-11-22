@@ -3,6 +3,8 @@
  * saved as JPEG in localStorage: no file-system permissions or network upload.
  */
 const KEY = 'eternal.wallpaper.v1'
+const GIF_KEY = 'eternal.wallpaper.gif.v1'
+let activeGifUrl: string | null = null
 const MAX_SOURCE_BYTES = 32 * 1024 * 1024
 const MAX_STORED_CHARS = 3_000_000
 const EFFECTS_KEY = 'eternal.wallpaper.effects.v2'
@@ -12,7 +14,7 @@ const DEFAULT_DARKNESS = 38
 const DEFAULT_BLUR = 0
 const MAX_BLUR = 24
 const VALID_DATA_URL = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
 function readStoredWallpaper(): string | null {
 	try {
@@ -24,7 +26,8 @@ function readStoredWallpaper(): string | null {
 }
 
 export function hasEternalWallpaper(): boolean {
-	return readStoredWallpaper() !== null
+	try { return readStoredWallpaper() !== null || localStorage.getItem(GIF_KEY) === '1' }
+	catch { return readStoredWallpaper() !== null }
 }
 
 export function applyEternalWallpaper(): void {
@@ -36,6 +39,7 @@ export function applyEternalWallpaper(): void {
 		)
 	} else {
 		document.documentElement.style.removeProperty('--eternal-custom-wallpaper')
+		try { if (localStorage.getItem(GIF_KEY) === '1') void restoreStoredGif() } catch { /* storage unavailable */ }
 	}
 	applyEternalWallpaperEffects()
 	applyEternalSidebarTransparency()
@@ -141,10 +145,23 @@ export function setEternalSidebarTransparency(transparency: number): void {
 
 export async function setEternalWallpaper(file: File): Promise<void> {
 	if (!ALLOWED_TYPES.has(file.type)) {
-		throw new Error('Selecciona una imagen JPG, PNG o WebP.')
+		throw new Error('Selecciona una imagen JPG, PNG, WebP o GIF.')
 	}
 	if (file.size > MAX_SOURCE_BYTES) {
 		throw new Error('La imagen debe ocupar como máximo 32 MB.')
+	}
+	if (file.type === 'image/gif') {
+		// Animated GIFs cannot go through Canvas: it would flatten their frames.
+		// IndexedDB persists the original file without extra Tauri permissions.
+		await storeGif(file)
+		try {
+			localStorage.setItem(GIF_KEY, '1')
+			localStorage.removeItem(KEY)
+		} catch {
+			throw new Error('No se pudo guardar la referencia al GIF local.')
+		}
+		showGif(file)
+		return
 	}
 	const objectUrl = URL.createObjectURL(file)
 	const image = new Image()
@@ -172,6 +189,8 @@ export async function setEternalWallpaper(file: File): Promise<void> {
 		} catch {
 			throw new Error('No hay espacio local para guardar la imagen.')
 		}
+		try { localStorage.removeItem(GIF_KEY) } catch { /* JPEG already saved */ }
+		releaseGifUrl()
 		applyEternalWallpaper()
 	} finally {
 		URL.revokeObjectURL(objectUrl)
@@ -180,5 +199,83 @@ export async function setEternalWallpaper(file: File): Promise<void> {
 
 export function resetEternalWallpaper(): void {
 	localStorage.removeItem(KEY)
+	localStorage.removeItem(GIF_KEY)
+	releaseGifUrl()
+	void deleteStoredGif()
 	applyEternalWallpaper()
+}
+
+
+function releaseGifUrl(): void {
+	if (activeGifUrl) URL.revokeObjectURL(activeGifUrl)
+	activeGifUrl = null
+}
+function showGif(file: Blob): void {
+	releaseGifUrl()
+	activeGifUrl = URL.createObjectURL(file)
+	document.documentElement.style.setProperty('--eternal-custom-wallpaper', `url("${activeGifUrl}")`)
+}
+
+const GIF_DATABASE = 'eternal-animated-wallpaper'
+const GIF_STORE = 'wallpapers'
+function openGifDatabase(): Promise<IDBDatabase> {
+	return new Promise((resolve, reject) => {
+		if (!('indexedDB' in window)) { reject(new Error('IndexedDB no disponible')); return }
+		const request = indexedDB.open(GIF_DATABASE, 1)
+		request.onupgradeneeded = () => {
+			if (!request.result.objectStoreNames.contains(GIF_STORE)) request.result.createObjectStore(GIF_STORE)
+		}
+		request.onsuccess = () => resolve(request.result)
+		request.onerror = () => reject(request.error ?? new Error('No se pudo abrir el almacenamiento local'))
+	})
+}
+async function storeGif(file: Blob): Promise<void> {
+	const db = await openGifDatabase()
+	try {
+		await new Promise<void>((resolve, reject) => {
+			const tx = db.transaction(GIF_STORE, 'readwrite')
+			tx.objectStore(GIF_STORE).put(file, 'current')
+			tx.oncomplete = () => resolve()
+			tx.onerror = () => reject(tx.error ?? new Error('No se pudo guardar el GIF'))
+			tx.onabort = () => reject(tx.error ?? new Error('Almacenamiento del GIF cancelado'))
+		})
+	} catch {
+		throw new Error('No se pudo guardar el GIF (máximo 32 MB). Comprueba el espacio disponible.')
+	} finally {
+		db.close()
+	}
+}
+async function restoreStoredGif(): Promise<void> {
+	try {
+		const db = await openGifDatabase()
+		let file: unknown
+		try {
+			file = await new Promise((resolve, reject) => {
+				const tx = db.transaction(GIF_STORE, 'readonly')
+				const request = tx.objectStore(GIF_STORE).get('current')
+				request.onsuccess = () => resolve(request.result)
+				request.onerror = () => reject(request.error)
+			})
+		} finally {
+			db.close()
+		}
+		if (!(file instanceof Blob) || file.type !== 'image/gif' || file.size > MAX_SOURCE_BYTES) return
+		if (readStoredWallpaper() !== null || localStorage.getItem(GIF_KEY) !== '1') return
+		showGif(file)
+	} catch {
+		// An unavailable GIF store is not a reason to block launcher startup.
+	}
+}
+async function deleteStoredGif(): Promise<void> {
+	try {
+		const db = await openGifDatabase()
+		try {
+			await new Promise<void>((resolve, reject) => {
+				const tx = db.transaction(GIF_STORE, 'readwrite')
+				tx.objectStore(GIF_STORE).delete('current')
+				tx.oncomplete = () => resolve()
+				tx.onerror = () => reject(tx.error)
+			})
+		} finally { db.close() }
+	} catch { /* an orphaned GIF can be overwritten safely later */ }
 }
