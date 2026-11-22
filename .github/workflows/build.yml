@@ -106,6 +106,11 @@ jobs:
             Write-Host 'No custom Discord application ID configured; Discord Rich Presence is disabled to avoid using the official Modrinth identity.'
           }
 
+      - name: Configure Eternal wallpaper and remote news
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: python patches/wallpaper_news_launcher.py
+
       - name: Disable optional telemetry and remote error reports
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
@@ -125,15 +130,47 @@ jobs:
           corepack enable
           pnpm --version
 
+      - name: Locate pnpm store
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        id: pnpm-store
+        working-directory: upstream
+        shell: pwsh
+        run: |
+          $store = pnpm store path
+          if ($LASTEXITCODE -ne 0) { throw 'Could not locate pnpm store' }
+          "path=$store" >> $env:GITHUB_OUTPUT
+
+      - name: Reuse pnpm downloads between builds
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        id: pnpm-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: eternal-pnpm-win-${{ hashFiles('upstream/pnpm-lock.yaml') }}
+          restore-keys: |
+            eternal-pnpm-win-
+
       - name: Setup Rust
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Reuse compiled Rust dependencies
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: upstream -> target
 
       - name: Install frontend dependencies
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         working-directory: upstream
         shell: pwsh
-        run: pnpm install --frozen-lockfile
+        run: |
+          $start = Get-Date
+          pnpm install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { throw 'pnpm install failed' }
+          $duration = [math]::Round(((Get-Date) - $start).TotalSeconds, 1)
+          "- pnpm dependency install: **$duration seconds**" >> $env:GITHUB_STEP_SUMMARY
+          "- pnpm cache hit: ${{ steps.pnpm-cache.outputs.cache-hit }}" >> $env:GITHUB_STEP_SUMMARY
 
       - name: Generate Sakura app icons (including Windows .ico)
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
@@ -180,7 +217,12 @@ jobs:
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         working-directory: upstream
         shell: pwsh
-        run: pnpm --filter @modrinth/app tauri build --bundles nsis
+        run: |
+          $start = Get-Date
+          pnpm --filter @modrinth/app tauri build --bundles nsis
+          if ($LASTEXITCODE -ne 0) { throw 'Tauri/NSIS build failed' }
+          $duration = [math]::Round(((Get-Date) - $start).TotalSeconds, 1)
+          "- Tauri + NSIS compilation: **$duration seconds**" >> $env:GITHUB_STEP_SUMMARY
 
       - name: Upload private Windows installer
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
