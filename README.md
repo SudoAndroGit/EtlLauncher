@@ -7,7 +7,19 @@
 - **Ejecutable/instalador:** `EternalLauncher`.
 - **Nombre mostrado dentro del launcher:** **Eternal** (barra superior, bienvenida, pantalla de carga y ajustes).
 - **Discord Rich Presence:** identidad de la aplicación **EternalLauncher** y recurso de imagen `eternal_logo`, solo cuando se configura una aplicación propia de Discord (ver abajo).
-- Tema rosa Sakura e icono personalizado.
+- **Tema único Sakura Glass:** cristal rosa con transparencias suaves, barra superior y laterales translúcidos, navegación redondeada y tarjetas ligeras. Conserva el icono personalizado.
+
+## Tema Sakura Glass 🌸
+
+El tema se aplica automáticamente en cada compilación usando `branding/theme.css`. **No se añadió ningún motor de temas** ni se modificó la estructura de Vue o Rust: los ajustes siguen funcionando como en el launcher original y el parche es fácil de revertir.
+
+- Fondo con degradados rosa/lavanda, sin imágenes externas ni animaciones adicionales.
+- Barra superior, navegación izquierda y panel derecho con efecto de cristal rosa.
+- Tarjetas de instancias con fondo translúcido y bordes más suaves, **sin desenfoque por tarjeta**, para no castigar bibliotecas grandes.
+- Compatibilidad con modo claro/oscuro, reducción de transparencia y el ajuste de renderizado avanzado (desactiva el blur).
+- Si el desenfoque no está disponible, quedan los colores semitransparentes de respaldo.
+
+Para deshacer este aspecto, basta con revertir los cambios CSS de `branding/theme.css`; no afecta a instancias, mods o partidas. La apariencia definitiva aún debe revisarse en Windows después de que el workflow compile.
 
 ## Cambios de interfaz y privacidad
 
@@ -55,7 +67,7 @@ En **Run workflow**, marca **Publish a private GitHub Release after the build su
 - `patches/eternal_features.py`: Hosting en navegación, bienvenida editable y Discord Rich Presence.
 - `patches/privacy_launcher.py`: privacidad de la compilación.
 - `branding/logo.png.b64`: logo transparente para el compilador.
-- `branding/theme.css`: tema rosa.
+- `branding/theme.css`: tema Sakura Glass (CSS únicamente, sin motor de temas).
 - `branding/welcome.json` y `branding/welcome-sidebar.vue`: contenido editable de bienvenida.
 
 ## Avisos y compatibilidad
