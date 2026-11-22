@@ -56,8 +56,13 @@ function updateEffects() {
 	setEternalWallpaperEffects(darkness.value, blur.value)
 }
 
-function updateWallpaperMode() {
-	setEternalWallpaperChoice(wallpaperChoice.value)
+function updateWallpaperMode(mode: WallpaperChoice) {
+	wallpaperChoice.value = mode
+	setEternalWallpaperChoice(mode)
+	error.value = ''
+	notice.value = mode === 'custom' && !custom.value
+		? 'Selecciona una imagen para usar tu fondo personalizado.'
+		: ''
 }
 
 function updateParticleMode() {
@@ -86,15 +91,12 @@ function restoreDefault() {
 	<section class="eternal-wallpaper-settings">
 		<h3>Fondo de Eternal</h3>
 		<p>Elige un fondo sincronizado, el Sakura integrado o una imagen propia. Los cambios se aplican al momento.</p>
-		<div class="eternal-appearance-selector">
-			<label for="eternal-wallpaper-mode">Fondo de pantalla</label>
-			<select id="eternal-wallpaper-mode" v-model="wallpaperChoice" @change="updateWallpaperMode">
-				<option value="default">Predeterminado (sincronizado)</option>
-				<option value="sakura">Sakura (integrado)</option>
-				<option value="custom" :disabled="!custom">Personalizado</option>
-			</select>
+		<div class="eternal-wallpaper-mode-group" role="group" aria-label="Fondo de pantalla">
+			<button type="button" class="eternal-wallpaper-mode" :class="{ 'is-selected': wallpaperChoice === 'default' }" :aria-pressed="wallpaperChoice === 'default'" @click="updateWallpaperMode('default')">Sincronizado</button>
+			<button type="button" class="eternal-wallpaper-mode" :class="{ 'is-selected': wallpaperChoice === 'sakura' }" :aria-pressed="wallpaperChoice === 'sakura'" @click="updateWallpaperMode('sakura')">Sakura</button>
+			<button type="button" class="eternal-wallpaper-mode" :class="{ 'is-selected': wallpaperChoice === 'custom' }" :aria-pressed="wallpaperChoice === 'custom'" @click="updateWallpaperMode('custom')">Personalizado</button>
 		</div>
-		<div class="eternal-wallpaper-actions">
+		<div v-if="wallpaperChoice === 'custom'" class="eternal-wallpaper-actions">
 			<input
 				ref="input"
 				type="file"
@@ -158,7 +160,7 @@ function restoreDefault() {
 		<div class="eternal-appearance-selector">
 			<label for="eternal-particle-mode">Estilo de partículas</label>
 			<select id="eternal-particle-mode" v-model="particleChoice" @change="updateParticleMode">
-				<option value="default">Predeterminado (sincronizado)</option>
+				<option value="default">Sincronizado</option>
 				<option value="none">Desactivadas</option>
 				<option value="sakura">Sakura (pétalos)</option>
 				<option value="lava">Lava (gotas)</option>
@@ -201,6 +203,12 @@ function restoreDefault() {
 	border-radius: 1rem;
 	background: var(--color-raised-bg);
 }
+.eternal-wallpaper-mode-group { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; margin-top: .95rem; }
+.eternal-wallpaper-mode { min-width: 0; padding: .75rem .5rem; border: 1px solid var(--eternal-glass-outline, rgba(255, 214, 236, .25)); border-radius: 13px; background: var(--color-button-bg); color: var(--color-contrast); font: inherit; font-weight: 600; cursor: pointer; transition: background-color .15s ease, border-color .15s ease; }
+.eternal-wallpaper-mode:hover { background: var(--eternal-v3-quiet-hover, var(--color-button-bg-hover)); }
+.eternal-wallpaper-mode.is-selected { color: #301827; background: #edabc9; border-color: #f6c7db; box-shadow: inset 0 1px 0 rgba(255,255,255,.43); }
+.eternal-wallpaper-mode:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
+@media (max-width: 520px) { .eternal-wallpaper-mode-group { gap: .3rem; } .eternal-wallpaper-mode { font-size: .82rem; padding: .7rem .2rem; } }
 .eternal-appearance-selector { display: flex; flex-direction: column; gap: .45rem; margin-top: .9rem; }
 .eternal-appearance-selector label { color: var(--color-contrast); font-size: .86rem; font-weight: 600; }
 .eternal-appearance-selector select { width: 100%; max-width: 380px; border: 1px solid var(--brand-gradient-border); background: var(--color-button-bg); color: var(--color-contrast); border-radius: 12px; padding: .65rem .85rem; font: inherit; cursor: pointer; }
