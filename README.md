@@ -27,7 +27,9 @@ En **Ajustes → Apariencia → Fondo de Eternal** puedes seleccionar un JPG, PN
 
 La fotografía seleccionada se **reduce localmente** a un máximo de 1920×1080 y se guarda comprimida en el almacenamiento local del WebView. No se sube a ningún servicio ni se añaden permisos de acceso a archivos. Si se borran los datos del WebView, la personalización se perderá.
 
-Dos deslizadores se aplican en tiempo real al fondo predeterminado o al personalizado: **Oscurecimiento** (capa oscura, 0–100 %) y **Desvanecimiento** (opacidad de la imagen, 0–100 %). Ambos valores se guardan localmente y persisten al reiniciar.
+En **Ajustes → Apariencia → Fondo de Eternal**, dos deslizadores se aplican en tiempo real al fondo predeterminado o al personalizado: **Oscurecimiento** (capa oscura, 0–100 %) y **Desenfoque** (0–24 px, solo sobre la imagen). Reemplazamos el antiguo desvanecimiento por desenfoque. Se conserva el oscurecimiento de instalaciones anteriores; los nuevos ajustes se guardan localmente y persisten al reiniciar.
+
+En esa misma pantalla, el bloque **Panel derecho** permite ajustar la **Transparencia del panel derecho** de 0 a 100 %. Al 0 % conserva la opacidad actual de cuenta, amigos y noticias. Al 100 % elimina sus fondos de cristal y el blur, sin desvanecer los textos; los controles siguen siendo funcionales. El valor se guarda localmente. La barra de navegación izquierda también es un poco más ancha y está desplazada hacia la derecha para que los iconos seleccionados no se recorten.
 
 El archivo de fondo está incluido como `branding/default-sakura.webp.b64` para que GitHub pueda almacenar la imagen sin un plugin adicional; `patches/brand_launcher.py` lo descodifica como `apps/app-frontend/public/eternal-default-sakura.webp` durante la compilación. Para cambiar el fondo integrado en otra versión, sustituye el Base64 por otra imagen WebP.
 
