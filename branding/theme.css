@@ -1049,3 +1049,164 @@
     backdrop-filter: none !important;
   }
 }
+
+
+/* === Eternal Glassy v4: settings and local seasonal particles ===
+ * One themed application settings modal and existing Minecraft account
+ * controls only. Does not change layout logic, fonts, inputs, or modal events.
+ */
+.modal-body.eternal-settings-modal {
+  border: 1px solid rgba(255, 223, 240, .20) !important;
+  border-radius: 23px !important;
+  background:
+    linear-gradient(153deg, rgba(255, 227, 245, .065), transparent 45%),
+    rgba(33, 19, 38, .94) !important;
+  box-shadow:
+    0 25px 80px -32px rgba(14, 7, 20, .79),
+    inset 0 1px 0 rgba(255, 255, 255, .10) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  backdrop-filter: blur(20px) saturate(120%);
+}
+.modal-body.eternal-settings-modal :is(.bg-surface-3, .bg-surface-2, .bg-bg-raised) {
+  background-color: rgba(45, 25, 47, .56) !important;
+}
+.modal-body.eternal-settings-modal [data-modal-content] {
+  color: var(--color-contrast);
+}
+.modal-body.eternal-settings-modal :is(button, input, select, textarea) {
+  border-radius: 13px;
+}
+.modal-body.eternal-settings-modal .eternal-wallpaper-settings {
+  border-radius: 17px !important;
+  border: 1px solid rgba(255, 228, 245, .16) !important;
+  background:
+    linear-gradient(151deg, rgba(255, 255, 255, .055), transparent 65%),
+    rgba(69, 35, 65, .42) !important;
+}
+.modal-body.eternal-settings-modal .eternal-appearance-selector select {
+  background: rgba(37, 20, 42, .77) !important;
+  color: var(--color-contrast);
+}
+.modal-body.eternal-settings-modal [aria-current="page"] {
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+/* Minecraft account dropdown, friends and selector visually match the glass. */
+.app-contents .app-sidebar .sidebar-default-content > div.p-4 :is(.bg-button-bg, .bg-surface-4) {
+  border-color: var(--eternal-glass-outline) !important;
+  background: rgba(72, 40, 69, .46) !important;
+}
+.app-contents .app-sidebar .sidebar-default-content > div.p-4 .rounded-xl {
+  border-radius: 15px !important;
+}
+.app-contents .app-sidebar .sidebar-default-content > div.p-4 .avatar {
+  border-radius: 10px;
+}
+:root[data-eternal-sidebar-clear="true"] .app-contents .app-sidebar
+  .sidebar-default-content > div.p-4 :is(.bg-button-bg, .bg-surface-4) {
+  background: transparent !important;
+}
+/* Light theme inherits the same geometry, with readable bright glass. */
+:root.light-mode .modal-body.eternal-settings-modal,
+.light-mode .modal-body.eternal-settings-modal,
+:root.light .modal-body.eternal-settings-modal,
+.light .modal-body.eternal-settings-modal {
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, .85), rgba(255, 235, 250, .78)) !important;
+  border-color: rgba(178, 93, 139, .22) !important;
+}
+:root.light-mode .modal-body.eternal-settings-modal :is(.bg-surface-3, .bg-surface-2, .bg-bg-raised),
+.light-mode .modal-body.eternal-settings-modal :is(.bg-surface-3, .bg-surface-2, .bg-bg-raised) {
+  background-color: rgba(255, 248, 253, .85) !important;
+}
+:root.light-mode .modal-body.eternal-settings-modal .eternal-wallpaper-settings,
+.light-mode .modal-body.eternal-settings-modal .eternal-wallpaper-settings {
+  background: rgba(255, 246, 252, .86) !important;
+}
+:root.light-mode .modal-body.eternal-settings-modal .eternal-appearance-selector select,
+.light-mode .modal-body.eternal-settings-modal .eternal-appearance-selector select {
+  background: rgba(255, 251, 254, .95) !important;
+}
+:root.light-mode .app-contents .app-sidebar .sidebar-default-content > div.p-4 :is(.bg-button-bg, .bg-surface-4),
+.light-mode .app-contents .app-sidebar .sidebar-default-content > div.p-4 :is(.bg-button-bg, .bg-surface-4) {
+  background: rgba(255, 246, 252, .77) !important;
+}
+
+/* The remote manifest selects a whitelisted LOCAL particle theme.
+ * Particles are confined to the home library viewport, pointer-inert and
+ * paused on other routes and with reduced-motion preferences.
+ */
+.app-contents .app-viewport { position: relative; }
+.eternal-particles-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none !important;
+  z-index: 2;
+  display: none;
+  overflow: hidden;
+  contain: layout paint style;
+}
+:root:not([data-eternal-particles="none"]):has(.app-contents section[data-library-page-background])
+  .eternal-particles-layer { display: block; }
+.eternal-particle {
+  position: absolute;
+  top: -16px;
+  left: var(--particle-left);
+  width: var(--particle-size);
+  height: calc(var(--particle-size) * 1.25);
+  opacity: .66;
+  border-radius: 75% 15% 70% 15%;
+  background: #fac5db;
+  box-shadow: 0 1px 4px rgba(252, 173, 218, .20);
+  animation: eternal-gentle-fall var(--particle-duration) linear var(--particle-delay) infinite;
+  will-change: transform;
+}
+@keyframes eternal-gentle-fall {
+  from { transform: translate3d(0, -12vh, 0) rotate(0deg); }
+  to { transform: translate3d(var(--particle-drift), 105vh, 0) rotate(380deg); }
+}
+:root[data-eternal-particles="lava"] .eternal-particle {
+  background: #ff9642;
+  border-radius: 60% 60% 65% 65%;
+  height: calc(var(--particle-size) * 1.5);
+  box-shadow: 0 0 9px rgba(255, 90, 24, .38);
+  opacity: .58;
+}
+:root[data-eternal-particles="otono"] .eternal-particle {
+  background: #d08a4d;
+  border-radius: 80% 10% 80% 10%;
+  opacity: .68;
+}
+:root[data-eternal-particles="primavera"] .eternal-particle {
+  background: #a0d08b;
+  border-radius: 75% 10% 75% 10%;
+  opacity: .67;
+}
+:root[data-eternal-particles="navidad"] .eternal-particle {
+  border-radius: 50%;
+  background: #f3f7ff;
+  width: calc(var(--particle-size) * .65);
+  height: calc(var(--particle-size) * .65);
+  box-shadow: 0 0 6px rgba(241, 247, 255, .32);
+  opacity: .82;
+}
+@media (prefers-reduced-motion: reduce) {
+  .eternal-particles-layer { display: none !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .modal-body.eternal-settings-modal {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .eternal-particles-layer { display: none !important; }
+  .modal-body.eternal-settings-modal,
+  .modal-body.eternal-settings-modal .eternal-wallpaper-settings {
+    background: Canvas !important;
+    color: CanvasText !important;
+    border-color: CanvasText !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
