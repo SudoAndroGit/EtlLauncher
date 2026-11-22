@@ -2,10 +2,11 @@
  * Eternal's optional local background. Images are resized in the WebView and
  * saved as JPEG in localStorage: no file-system permissions or network upload.
  */
+import { MAX_IMAGE_BYTES, validateEternalImage } from './eternal-image-validation'
+
 const KEY = 'eternal.wallpaper.v1'
 const GIF_KEY = 'eternal.wallpaper.gif.v1'
 let activeGifUrl: string | null = null
-const MAX_SOURCE_BYTES = 32 * 1024 * 1024
 const MAX_STORED_CHARS = 3_000_000
 const EFFECTS_KEY = 'eternal.wallpaper.effects.v2'
 const LEGACY_EFFECTS_KEY = 'eternal.wallpaper.effects.v1'
@@ -14,7 +15,6 @@ const DEFAULT_DARKNESS = 38
 const DEFAULT_BLUR = 0
 const MAX_BLUR = 24
 const VALID_DATA_URL = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
 function readStoredWallpaper(): string | null {
 	try {
@@ -144,23 +144,21 @@ export function setEternalSidebarTransparency(transparency: number): void {
 }
 
 export async function setEternalWallpaper(file: File): Promise<void> {
-	if (!ALLOWED_TYPES.has(file.type)) {
-		throw new Error('Selecciona una imagen JPG, PNG, WebP o GIF.')
-	}
-	if (file.size > MAX_SOURCE_BYTES) {
-		throw new Error('La imagen debe ocupar como máximo 32 MB.')
-	}
-	if (file.type === 'image/gif') {
+	// Validate extension, real signature, resolution, GIF frames and decoder
+	// before writing anything to localStorage / IndexedDB.
+	const verified = await validateEternalImage(file, file.name)
+	if (verified.mime === 'image/gif') {
 		// Animated GIFs cannot go through Canvas: it would flatten their frames.
 		// IndexedDB persists the original file without extra Tauri permissions.
-		await storeGif(file)
+		const savedGif = new Blob([file], { type: 'image/gif' })
+		await storeGif(savedGif)
 		try {
 			localStorage.setItem(GIF_KEY, '1')
 			localStorage.removeItem(KEY)
 		} catch {
 			throw new Error('No se pudo guardar la referencia al GIF local.')
 		}
-		showGif(file)
+		showGif(savedGif)
 		return
 	}
 	const objectUrl = URL.createObjectURL(file)
@@ -241,7 +239,7 @@ async function storeGif(file: Blob): Promise<void> {
 			tx.onabort = () => reject(tx.error ?? new Error('Almacenamiento del GIF cancelado'))
 		})
 	} catch {
-		throw new Error('No se pudo guardar el GIF (máximo 32 MB). Comprueba el espacio disponible.')
+		throw new Error('No se pudo guardar el GIF (máximo 22 MB). Comprueba el espacio disponible.')
 	} finally {
 		db.close()
 	}
@@ -260,7 +258,8 @@ async function restoreStoredGif(): Promise<void> {
 		} finally {
 			db.close()
 		}
-		if (!(file instanceof Blob) || file.type !== 'image/gif' || file.size > MAX_SOURCE_BYTES) return
+		if (!(file instanceof Blob) || file.type !== 'image/gif' || file.size > MAX_IMAGE_BYTES) return
+		await validateEternalImage(file, 'restored.gif')
 		if (readStoredWallpaper() !== null || localStorage.getItem(GIF_KEY) !== '1') return
 		showGif(file)
 	} catch {
