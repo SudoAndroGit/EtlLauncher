@@ -36,7 +36,7 @@ Tanto los archivos locales como las imágenes obtenidas de `appearance.json` deb
 - **Fondos remotos**: solo HTTPS y el mismo origen que el archivo `appearance.json`, sin redirecciones. Se valida el flujo de descarga mientras llega (límite real de 22 MiB aunque falte `Content-Length`), formato, dimensiones y decodificación **antes** de aplicar el fondo. Si falla, se muestra Sakura integrado.
 - **Seguridad**: estos controles mitigan archivos malformados y problemas de recursos, pero no sustituyen las actualizaciones del motor de imágenes/WebView2, ni garantizan ausencia total de vulnerabilidades.
 
-Las 12 pruebas automáticas de firmas, límites y GIF están en `tests/image-validation.test.mjs`. El workflow las ejecuta con Node 24 **antes** de instalar dependencias y compilar. Una prueba fallida detiene el build; nunca garantiza por sí sola que la interfaz final funcione en Windows.
+Las 13 pruebas automáticas de firmas, límites y GIF están en `tests/image-validation.test.mjs`. El workflow las ejecuta con Node 24 **antes** de instalar dependencias y compilar. Una prueba fallida detiene el build; nunca garantiza por sí sola que la interfaz final funcione en Windows.
 
 En **Ajustes → Apariencia → Fondo de Eternal**, dos deslizadores se aplican en tiempo real al fondo predeterminado o al personalizado: **Oscurecimiento** (capa oscura, 0–100 %) y **Desenfoque** (0–24 px, solo sobre la imagen). Reemplazamos el antiguo desvanecimiento por desenfoque. Se conserva el oscurecimiento de instalaciones anteriores; los nuevos ajustes se guardan localmente y persisten al reiniciar.
 
