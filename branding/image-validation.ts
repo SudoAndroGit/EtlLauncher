@@ -50,7 +50,9 @@ function jpegDimensions(bytes: Uint8Array): { width: number; height: number } {
     fail('La firma JPEG es incorrecta.')
   }
   let p = 2
+  let segments = 0
   while (p < bytes.length) {
+    if (++segments > 20_000) fail('JPEG con demasiados segmentos.')
     if (bytes[p++] !== 0xff) fail('Estructura JPEG no válida.')
     while (p < bytes.length && bytes[p] === 0xff) p++
     requireSize(bytes, p + 1)
@@ -79,7 +81,9 @@ function pngDimensions(bytes: Uint8Array): { width: number; height: number } {
   const height = be32(bytes, 20)
   let p = 8
   let hasPixels = false
+  let chunks = 0
   while (p + 12 <= bytes.length) {
+    if (++chunks > 20_000) fail('PNG con demasiados bloques.')
     const size = be32(bytes, p)
     const type = ascii(bytes, p + 4, p + 8)
     requireSize(bytes, p + 12 + size)
@@ -139,8 +143,10 @@ function gifDetails(bytes: Uint8Array): ValidatedImage {
   requireSize(bytes, p)
   let frames = 0
   let totalPixels = 0
+  let blocks = 0
   function skipBlocks(): void {
     while (true) {
+      if (++blocks > 100_000) fail('GIF con demasiados bloques.')
       requireSize(bytes, p + 1)
       const size = bytes[p++]
       if (size === 0) return
@@ -149,6 +155,7 @@ function gifDetails(bytes: Uint8Array): ValidatedImage {
     }
   }
   while (p < bytes.length) {
+    if (++blocks > 100_000) fail('GIF con demasiados bloques.')
     const type = bytes[p++]
     if (type === 0x3b) {
       if (!frames || p !== bytes.length) fail('GIF incompleto o con datos inesperados.')
