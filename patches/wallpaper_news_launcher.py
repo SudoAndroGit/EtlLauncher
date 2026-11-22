@@ -91,8 +91,8 @@ def install_wallpaper() -> None:
     # only after Vue mounts. It is hidden on all routes except the library.
     replace_once(
         main,
-        "\t\tapp.mount('#app')",
-        "\t\tapp.mount('#app')\n\t\tmountEternalParticles()",
+        "\tapp.mount('#app')",
+        "\tapp.mount('#app')\n\tmountEternalParticles()",
     )
 
 def install_news_config() -> None:
