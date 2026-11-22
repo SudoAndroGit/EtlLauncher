@@ -31,6 +31,7 @@ def install_wallpaper() -> None:
     display = FRONTEND / "features/settings/display"
     shutil.copyfile(BASE / "branding/wallpaper.ts", display / "eternal-wallpaper.ts")
     shutil.copyfile(BASE / "branding/wallpaper-settings.vue", display / "eternal-wallpaper-settings.vue")
+    shutil.copyfile(BASE / "branding/appearance-remote.ts", display / "eternal-appearance.ts")
 
     settings = display / "appearance-settings.vue"
     replace_once(
@@ -45,20 +46,54 @@ def install_wallpaper() -> None:
         "\t<AppearanceSettingsLayout />\n\t<EternalWallpaperSettings />",
     )
 
+    # Show the existing supported system/light/OLED modes only. Keep the
+    # upstream theme engine intact so accounts and OS synchronization work.
+    replace_once(
+        settings,
+        """const themeOptions = computed(() =>
+	theme.options.filter(
+		(option) => option !== 'retro' || appSettings.devMode || current.value.theme === 'retro',
+	),
+)""",
+        """const themeOptions = computed(() =>
+	theme.options.filter((option) => option === 'oled' || option === 'light' || option === 'system'),
+)""",
+    )
+
+    # Name only the settings modal, so the Eternal Glass CSS does not touch
+    # unrelated installer confirmations, warning dialogs or other popups.
+    modal = FRONTEND / "features/settings/app-settings-modal/index.vue"
+    replace_once(
+        modal,
+        '\t\tref="modal"\n\t\t:tabs="availableTabs"',
+        '\t\tref="modal"\n\t\tclass="eternal-settings-modal"\n\t\t:tabs="availableTabs"',
+    )
+
+
     # Apply the image (if any) before Vue paints the main launcher shell.
     main = FRONTEND / "main.js"
     replace_once(
         main,
         "import App from '@/App.vue'",
         "import { applyEternalWallpaper } from '@/features/settings/display/eternal-wallpaper'\n"
+        "import { initializeEternalAppearance, mountEternalParticles } from '@/features/settings/display/eternal-appearance'\n"
         "import App from '@/App.vue'",
     )
     replace_once(
         main,
         "const app = createApp(App)",
-        "applyEternalWallpaper()\nconst app = createApp(App)",
+        "applyEternalWallpaper()\nvoid initializeEternalAppearance()\nconst app = createApp(App)",
     )
 
+
+
+    # The main menu creates a small pointer-events:none CSS particle layer
+    # only after Vue mounts. It is hidden on all routes except the library.
+    replace_once(
+        main,
+        "\t\tapp.mount('#app')",
+        "\t\tapp.mount('#app')\n\t\tmountEternalParticles()",
+    )
 
 def install_news_config() -> None:
     cfg = json.loads((BASE / "branding/news-config.json").read_text(encoding="utf-8"))
