@@ -73,20 +73,20 @@
  */
 :root {
   --eternal-glass-wallpaper:
-    radial-gradient(ellipse at 82% 8%, rgba(245, 169, 197, .19), transparent 43%),
-    radial-gradient(ellipse at 16% 83%, rgba(181, 130, 199, .15), transparent 48%),
-    linear-gradient(145deg, #211922 0%, #18141e 48%, #281d29 100%);
-  --eternal-glass-navbar: rgba(46, 29, 48, .70);
-  --eternal-glass-titlebar: rgba(54, 34, 53, .66);
-  --eternal-glass-sidebar: rgba(58, 34, 55, .69);
-  --eternal-glass-content: rgba(27, 19, 30, .48);
-  --eternal-glass-card: rgba(67, 39, 65, .60);
-  --eternal-glass-shine: rgba(255, 246, 252, .16);
-  --eternal-glass-outline: rgba(255, 239, 250, .27);
-  --eternal-glass-outline-hover: rgba(250, 178, 213, .47);
+    radial-gradient(ellipse at 82% 8%, rgba(255, 151, 201, .31), transparent 45%),
+    radial-gradient(ellipse at 16% 83%, rgba(225, 123, 187, .23), transparent 49%),
+    linear-gradient(145deg, #30202f 0%, #211622 48%, #38233b 100%);
+  --eternal-glass-navbar: rgba(80, 39, 71, .63);
+  --eternal-glass-titlebar: rgba(88, 43, 76, .61);
+  --eternal-glass-sidebar: rgba(89, 42, 78, .63);
+  --eternal-glass-content: rgba(38, 21, 40, .42);
+  --eternal-glass-card: rgba(108, 54, 94, .53);
+  --eternal-glass-shine: rgba(255, 246, 252, .21);
+  --eternal-glass-outline: rgba(255, 236, 249, .32);
+  --eternal-glass-outline-hover: rgba(255, 196, 230, .59);
   --eternal-glass-shadow: rgba(16, 7, 20, .45);
-  --eternal-glass-nav-selected: rgba(241, 158, 196, .26);
-  --eternal-glass-nav-hover: rgba(242, 172, 207, .13);
+  --eternal-glass-nav-selected: rgba(247, 158, 203, .34);
+  --eternal-glass-nav-hover: rgba(246, 177, 213, .20);
 }
 
 /* The existing Modrinth light/dark setting still controls contrast.
@@ -135,6 +135,9 @@
 
 .app-contents.app-contents {
   background: var(--eternal-glass-content) !important;
+  background-image:
+    radial-gradient(ellipse at 88% 12%, rgba(246, 143, 198, .13), transparent 52%),
+    radial-gradient(ellipse at 7% 85%, rgba(221, 125, 183, .075), transparent 51%) !important;
 }
 
 .app-contents .app-sidebar {
@@ -170,7 +173,7 @@
 .app-contents [data-library-instance-card] {
   background: linear-gradient(
     150deg,
-    var(--eternal-glass-shine),
+    rgba(255, 203, 230, .16),
     var(--eternal-glass-card) 58%
   ) !important;
   border-color: var(--eternal-glass-outline) !important;
@@ -207,8 +210,8 @@
   .app-grid-layout:not(.disable-advanced-rendering) .app-grid-navbar,
   .app-grid-layout:not(.disable-advanced-rendering) .app-title-bar,
   .app-contents:not(.disable-advanced-rendering) .app-sidebar {
-    -webkit-backdrop-filter: blur(10px) saturate(115%);
-    backdrop-filter: blur(10px) saturate(115%);
+    -webkit-backdrop-filter: blur(16px) saturate(128%);
+    backdrop-filter: blur(16px) saturate(128%);
   }
 }
 
@@ -240,9 +243,9 @@
  * Never blur individual library items: large libraries stay lightweight.
  */
 :root {
-  --eternal-glass-white-reflection: rgba(255, 255, 255, .16);
-  --eternal-glass-soft-reflection: rgba(255, 255, 255, .075);
-  --eternal-glass-rose-halo: rgba(255, 171, 218, .13);
+  --eternal-glass-white-reflection: rgba(255, 255, 255, .22);
+  --eternal-glass-soft-reflection: rgba(255, 255, 255, .11);
+  --eternal-glass-rose-halo: rgba(255, 155, 210, .24);
 }
 
 :root.light-mode,
