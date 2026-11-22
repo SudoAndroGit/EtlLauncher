@@ -753,7 +753,7 @@
   pointer-events: none;
 }
 .app-grid-layout.app-grid-layout::before {
-  background-image: var(--eternal-custom-wallpaper, url("/eternal-default-sakura.webp")) !important;
+  background-image: var(--eternal-active-wallpaper, var(--eternal-custom-wallpaper, url("/eternal-default-sakura.webp"))) !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
