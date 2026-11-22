@@ -968,26 +968,26 @@
  * receives input normally; only visual background alpha is adjustable.
  */
 :root {
-  --eternal-glass-sidebar: rgba(38, 22, 40, calc(.38 * var(--eternal-sidebar-visibility, 1)));
-  --eternal-glass-module-bg: rgba(38, 22, 40, calc(.45 * var(--eternal-sidebar-visibility, 1)));
+  --eternal-glass-sidebar: rgba(38, 22, 40, var(--eternal-sidebar-dark-shell-alpha, .38));
+  --eternal-glass-module-bg: rgba(38, 22, 40, var(--eternal-sidebar-dark-module-alpha, .45));
   --eternal-glass-news-bg:
     linear-gradient(
       150deg,
-      rgba(255, 255, 255, calc(.045 * var(--eternal-sidebar-visibility, 1))),
-      rgba(44, 25, 46, calc(.55 * var(--eternal-sidebar-visibility, 1)))
+      rgba(255, 255, 255, var(--eternal-sidebar-dark-highlight-alpha, .045)),
+      rgba(44, 25, 46, var(--eternal-sidebar-dark-news-alpha, .55))
     );
 }
 :root.light-mode,
 .light-mode,
 :root.light,
 .light {
-  --eternal-glass-sidebar: rgba(255, 246, 251, calc(.62 * var(--eternal-sidebar-visibility, 1)));
-  --eternal-glass-module-bg: rgba(255, 247, 252, calc(.80 * var(--eternal-sidebar-visibility, 1)));
+  --eternal-glass-sidebar: rgba(255, 246, 251, var(--eternal-sidebar-light-shell-alpha, .62));
+  --eternal-glass-module-bg: rgba(255, 247, 252, var(--eternal-sidebar-light-module-alpha, .80));
   --eternal-glass-news-bg:
     linear-gradient(
       150deg,
-      rgba(255, 255, 255, calc(.91 * var(--eternal-sidebar-visibility, 1))),
-      rgba(255, 243, 251, calc(.78 * var(--eternal-sidebar-visibility, 1)))
+      rgba(255, 255, 255, var(--eternal-sidebar-light-highlight-alpha, .91)),
+      rgba(255, 243, 251, var(--eternal-sidebar-light-news-alpha, .78))
     );
 }
 .app-contents .app-sidebar {
@@ -1010,6 +1010,17 @@
     -webkit-backdrop-filter: var(--eternal-sidebar-card-backdrop) !important;
   }
 }
+/* At 100% also clear the inner Minecraft account selector, its dropdown
+ * surface, the friends search and the sidebar's scroll fade. Text remains.
+ */
+:root[data-eternal-sidebar-clear="true"] .app-contents .app-sidebar
+  .sidebar-default-content :is(.bg-button-bg, .group\/input) {
+  background: transparent !important;
+}
+:root[data-eternal-sidebar-clear="true"] .app-contents .app-sidebar .sidebar-scroll-fade {
+  background: transparent !important;
+}
+
 /* Honor reduced-transparency preferences and Windows high-contrast themes. */
 @media (prefers-reduced-transparency: reduce) {
   .app-grid-layout.app-grid-layout::before {
