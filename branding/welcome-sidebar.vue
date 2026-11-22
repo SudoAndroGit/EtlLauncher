@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
+import { openUrl } from '@tauri-apps/plugin-opener'
 
 import welcome from './eternal-welcome.json'
 import feedConfig from './eternal-news-config.json'
@@ -106,6 +107,15 @@ async function refreshNews() {
 	}
 }
 
+async function openArticle(url) {
+	if (!safeHttpsUrl(url)) return
+	try {
+		await openUrl(url)
+	} catch {
+		feedError.value = 'No se pudo abrir el enlace.'
+	}
+}
+
 onMounted(() => {
 	if (!feedUrl) return
 	loadCache()
@@ -131,7 +141,7 @@ onUnmounted(() => {
 					<time v-if="article.date" class="eternal-news-date">{{ article.date }}</time>
 					<h3 class="eternal-welcome-title">{{ article.title }}</h3>
 					<p class="eternal-welcome-description">{{ article.body }}</p>
-					<a v-if="article.url" :href="article.url" target="_blank" rel="noopener noreferrer" class="eternal-news-link">Leer más ↗</a>
+					<button v-if="article.url" type="button" class="eternal-news-link" @click="openArticle(article.url)">Leer más ↗</button>
 				</div>
 				<p v-if="cached || feedError" class="eternal-news-status">{{ feedError || 'Últimas noticias guardadas.' }}</p>
 				<p v-else-if="updateDate" class="eternal-news-date">Actualizado: {{ updateDate }}</p>
@@ -242,9 +252,13 @@ onUnmounted(() => {
 .eternal-news-link {
 	display: inline-block;
 	margin-top: .4rem;
+	padding: 0;
+	border: 0;
+	background: transparent;
 	font-size: .8rem;
 	color: var(--color-brand);
 	text-decoration: underline;
+	cursor: pointer;
 }
 .eternal-news-refresh {
 	margin-top: .85rem;
