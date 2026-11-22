@@ -10,11 +10,21 @@ import {
 	setEternalWallpaperEffects,
 	setEternalSidebarTransparency,
 } from './eternal-wallpaper'
+import {
+	getEternalParticleChoice,
+	getEternalWallpaperChoice,
+	setEternalParticleChoice,
+	setEternalWallpaperChoice,
+	type ParticleChoice,
+	type WallpaperChoice,
+} from './eternal-appearance'
 
 const initialEffects = getEternalWallpaperEffects()
 const darkness = ref(initialEffects.darkness)
 const blur = ref(initialEffects.blur)
 const sidebarTransparency = ref(getEternalSidebarTransparency())
+const wallpaperChoice = ref<WallpaperChoice>(getEternalWallpaperChoice())
+const particleChoice = ref<ParticleChoice>(getEternalParticleChoice())
 const input = ref<HTMLInputElement | null>(null)
 const custom = ref(hasEternalWallpaper())
 const busy = ref(false)
@@ -32,6 +42,8 @@ async function selectImage(event: Event) {
 	try {
 		await setEternalWallpaper(file)
 		custom.value = true
+		wallpaperChoice.value = 'custom'
+		setEternalWallpaperChoice('custom')
 		notice.value = 'Fondo guardado. Se mantendrá al reiniciar Eternal.'
 	} catch (e) {
 		error.value = e instanceof Error ? e.message : 'No se pudo guardar el fondo.'
@@ -44,6 +56,14 @@ function updateEffects() {
 	setEternalWallpaperEffects(darkness.value, blur.value)
 }
 
+function updateWallpaperMode() {
+	setEternalWallpaperChoice(wallpaperChoice.value)
+}
+
+function updateParticleMode() {
+	setEternalParticleChoice(particleChoice.value)
+}
+
 function updateSidebarTransparency() {
 	setEternalSidebarTransparency(sidebarTransparency.value)
 }
@@ -52,6 +72,8 @@ function restoreDefault() {
 	try {
 		resetEternalWallpaper()
 		custom.value = false
+		wallpaperChoice.value = 'sakura'
+		setEternalWallpaperChoice('sakura')
 		error.value = ''
 		notice.value = 'Se restauró el fondo Sakura Glass.'
 	} catch {
@@ -63,18 +85,26 @@ function restoreDefault() {
 <template>
 	<section class="eternal-wallpaper-settings">
 		<h3>Fondo de Eternal</h3>
-		<p>Usa tu fotografía o el fondo Sakura predeterminado. Los cambios se aplican al momento.</p>
+		<p>Elige un fondo sincronizado, el Sakura integrado o una imagen propia. Los cambios se aplican al momento.</p>
+		<div class="eternal-appearance-selector">
+			<label for="eternal-wallpaper-mode">Fondo de pantalla</label>
+			<select id="eternal-wallpaper-mode" v-model="wallpaperChoice" @change="updateWallpaperMode">
+				<option value="default">Predeterminado (sincronizado)</option>
+				<option value="sakura">Sakura (integrado)</option>
+				<option value="custom" :disabled="!custom">Personalizado</option>
+			</select>
+		</div>
 		<div class="eternal-wallpaper-actions">
 			<input
 				ref="input"
 				type="file"
-				accept="image/jpeg,image/png,image/webp"
+				accept="image/jpeg,image/png,image/webp,image/gif"
 				class="eternal-wallpaper-file"
 				aria-label="Seleccionar imagen de fondo"
 				@change="selectImage"
 			/>
 			<button type="button" class="eternal-wallpaper-primary" :disabled="busy" @click="input?.click()">
-				{{ busy ? 'Procesando imagen…' : custom ? 'Cambiar fotografía' : 'Elegir fotografía' }}
+				{{ busy ? 'Procesando imagen…' : custom ? 'Cambiar imagen / GIF' : 'Elegir imagen / GIF' }}
 			</button>
 			<button
 				type="button"
@@ -118,9 +148,26 @@ function restoreDefault() {
 			</div>
 			<p class="eternal-wallpaper-hint">El oscurecimiento añade una capa oscura. El desenfoque suaviza únicamente el fondo, no los botones ni los textos.</p>
 		</div>
-		<p class="eternal-wallpaper-hint">Admite JPG, PNG o WebP (máx. 32 MB). Se reduce y guarda localmente; no se sube a Internet.</p>
+		<p class="eternal-wallpaper-hint">Admite JPG, PNG, WebP y GIF (máx. 32 MB). Los GIF conservan su animación y se guardan localmente; no se suben a Internet.</p>
 		<p v-if="error" class="eternal-wallpaper-error" role="alert">{{ error }}</p>
 		<p v-else-if="notice" class="eternal-wallpaper-success" role="status">{{ notice }}</p>
+	</section>
+	<section class="eternal-wallpaper-settings">
+		<h3>Animación del menú principal</h3>
+		<p>Partículas ligeras sobre la biblioteca. Solo se animan en la pantalla principal y puedes desactivarlas.</p>
+		<div class="eternal-appearance-selector">
+			<label for="eternal-particle-mode">Estilo de partículas</label>
+			<select id="eternal-particle-mode" v-model="particleChoice" @change="updateParticleMode">
+				<option value="default">Predeterminado (sincronizado)</option>
+				<option value="none">Desactivadas</option>
+				<option value="sakura">Sakura (pétalos)</option>
+				<option value="lava">Lava (gotas)</option>
+				<option value="otono">Otoño (hojas secas)</option>
+				<option value="primavera">Primavera (hojas verdes)</option>
+				<option value="navidad">Navidad (copos de nieve)</option>
+			</select>
+		</div>
+		<p class="eternal-wallpaper-hint">Las opciones manuales no se sobrescriben con las configuraciones remotas. Se respeta la reducción de movimiento del sistema.</p>
 	</section>
 	<section class="eternal-wallpaper-settings">
 		<h3>Panel derecho</h3>
@@ -154,6 +201,10 @@ function restoreDefault() {
 	border-radius: 1rem;
 	background: var(--color-raised-bg);
 }
+.eternal-appearance-selector { display: flex; flex-direction: column; gap: .45rem; margin-top: .9rem; }
+.eternal-appearance-selector label { color: var(--color-contrast); font-size: .86rem; font-weight: 600; }
+.eternal-appearance-selector select { width: 100%; max-width: 380px; border: 1px solid var(--brand-gradient-border); background: var(--color-button-bg); color: var(--color-contrast); border-radius: 12px; padding: .65rem .85rem; font: inherit; cursor: pointer; }
+.eternal-appearance-selector select:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
 .eternal-wallpaper-settings h3 {
 	margin: 0 0 .5rem;
 	font-size: 1.1rem;
