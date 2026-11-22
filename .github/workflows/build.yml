@@ -1,6 +1,12 @@
 name: Build EtlLauncher (experimental)
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/build.yml'
+      - 'patches/**'
+      - 'branding/**'
   workflow_dispatch:
   schedule:
     - cron: '17 */6 * * *'
