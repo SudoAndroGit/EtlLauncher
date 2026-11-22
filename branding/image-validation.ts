@@ -70,6 +70,34 @@ function jpegDimensions(bytes: Uint8Array): { width: number; height: number } {
   fail('El JPEG no contiene una cabecera de imagen válida.')
 }
 
+function pngDimensions(bytes: Uint8Array): { width: number; height: number } {
+  if (bytes.length < 45 || ascii(bytes, 0, 8) !== '\x89PNG\r\n\x1a\n' ||
+    be32(bytes, 8) !== 13 || ascii(bytes, 12, 16) !== 'IHDR') {
+    fail('Cabecera PNG inválida.')
+  }
+  const width = be32(bytes, 16)
+  const height = be32(bytes, 20)
+  let p = 8
+  let hasPixels = false
+  while (p + 12 <= bytes.length) {
+    const size = be32(bytes, p)
+    const type = ascii(bytes, p + 4, p + 8)
+    requireSize(bytes, p + 12 + size)
+    if (type === 'acTL') {
+      fail('PNG animado no admitido; utiliza un GIF validado.')
+    }
+    if (type === 'IDAT') hasPixels = true
+    if (type === 'IEND') {
+      if (size !== 0 || !hasPixels || p + 12 !== bytes.length) {
+        fail('PNG incompleto o con datos inesperados.')
+      }
+      return { width, height }
+    }
+    p += 12 + size
+  }
+  fail('PNG incompleto: falta el bloque final.')
+}
+
 function webpDimensions(bytes: Uint8Array): { width: number; height: number } {
   if (bytes.length < 30 || ascii(bytes, 0, 4) !== 'RIFF' ||
     ascii(bytes, 8, 12) !== 'WEBP' || le32(bytes, 4) + 8 !== bytes.length) {
@@ -192,9 +220,10 @@ async function decodeImage(file: Blob, expected: ValidatedImage): Promise<void> 
         timeout = window.setTimeout(() => reject(new Error('Tiempo de procesamiento de imagen agotado.')), 10_000)
       }),
     ])
-    if (image.naturalWidth !== expected.width || image.naturalHeight !== expected.height) {
-      fail('Las dimensiones declaradas no coinciden con las decodificadas.')
-    }
+    // EXIF rotation can legitimately swap landscape and portrait dimensions.
+    const matching = image.naturalWidth === expected.width && image.naturalHeight === expected.height
+    const rotated = image.naturalWidth === expected.height && image.naturalHeight === expected.width
+    if (!matching && !rotated) fail('Las dimensiones declaradas no coinciden con las decodificadas.')
   } catch (error) {
     if (error instanceof Error && (error.message.includes('Tiempo de procesamiento') ||
       error.message.includes('dimensiones declaradas'))) throw error
@@ -230,10 +259,7 @@ export async function inspectEternalImage(file: Blob, filename: string): Promise
   } else {
     let dimensions: { width: number; height: number }
     if (mime === 'image/png') {
-      if (bytes.length < 33 || be32(bytes, 8) !== 13 || ascii(bytes, 12, 16) !== 'IHDR') {
-        fail('Cabecera PNG inválida.')
-      }
-      dimensions = { width: be32(bytes, 16), height: be32(bytes, 20) }
+      dimensions = pngDimensions(bytes)
     } else if (mime === 'image/jpeg') {
       dimensions = jpegDimensions(bytes)
     } else {
