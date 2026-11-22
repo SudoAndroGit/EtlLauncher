@@ -20,10 +20,10 @@ on:
 permissions:
   contents: read
 
-# Discord Application ID (public identifier, not a bot token).
-# Set repo variable ETERNAL_DISCORD_CLIENT_ID to show EternalLauncher on Discord.
+# Discord Application ID is a public identifier, never a bot token.
+# Use the approved EternalLauncher ID by default; an Actions variable can override it.
 env:
-  ETERNAL_DISCORD_CLIENT_ID: ${{ vars.ETERNAL_DISCORD_CLIENT_ID }}
+  ETERNAL_DISCORD_CLIENT_ID: ${{ vars.ETERNAL_DISCORD_CLIENT_ID || '1269391023797436426' }}
 
 concurrency:
   group: eternallauncher-windows
