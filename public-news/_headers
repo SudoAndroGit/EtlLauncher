@@ -1,0 +1,5 @@
+/news.json
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+  Cache-Control: public, max-age=180
+  X-Content-Type-Options: nosniff
