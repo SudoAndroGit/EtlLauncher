@@ -7,11 +7,11 @@
 - **Ejecutable/instalador:** `EternalLauncher`.
 - **Nombre mostrado dentro del launcher:** **Eternal** (barra superior, bienvenida, pantalla de carga y ajustes).
 - **Discord Rich Presence:** identidad de la aplicación **EternalLauncher** y recurso de imagen `eternal_logo`, solo cuando se configura una aplicación propia de Discord (ver abajo).
-- **Tema único Sakura Glass:** cristal rosa con transparencias suaves, barra superior y laterales translúcidos, navegación redondeada y tarjetas ligeras. Conserva el icono personalizado.
+- **Tema Sakura predeterminado:** cristal rosa con transparencias suaves, barra superior y laterales translúcidos, navegación redondeada y tarjetas ligeras. Conserva el icono personalizado. El modo OLED mantiene la marca rosa pero usa paneles negros.
 
 ## Tema Sakura Glass
 
-El tema se aplica automáticamente en cada compilación usando `branding/theme.css`. **No se añadió ningún motor de temas** ni se modificó la estructura de Vue o Rust: los ajustes siguen funcionando como en el launcher original y el parche es fácil de revertir.
+La apariencia se aplica en cada compilación usando `branding/theme.css`. El selector de Modrinth incorpora **Sakura, OLED, Luz y Sistema**; **Sakura es el valor predeterminado**. Se conserva el enum nativo de Rust: Sakura utiliza un valor OLED compatible para los ajustes del sistema y una clave local para distinguir la apariencia escogida. Esto evita alterar la estructura de Minecraft.
 
 - Fondo Sakura predeterminado integrado en el instalador como WebP (1920 × 1280). Funciona sin Internet y admite fotografía local alternativa.
 - Barra superior, navegación izquierda y panel derecho con efecto de cristal rosa, mayor transparencia y reflejos blancos suaves.
@@ -21,17 +21,26 @@ El tema se aplica automáticamente en cada compilación usando `branding/theme.c
 
 Para deshacer este aspecto, basta con revertir los cambios CSS de `branding/theme.css`; no afecta a instancias, mods o partidas. La apariencia definitiva aún debe revisarse en Windows después de que el workflow compile.
 
+
+## Temas de menús de Eternal
+
+**Sakura**: los cuadros de Ajustes, la creación de instancias, las tarjetas de exploración de Modrinth y la columna de filtros utilizan paneles color ciruela translúcidos, con botones rosados.
+
+**OLED**: esas mismas superficies de menús se pintan en negro o gris muy oscuro. El inicio, las barras del launcher, la imagen de fondo y los acentos de acción siguen siendo Sakura. **Luz** y **Sistema** conservan su comportamiento original. No se introducen nuevos permisos de Windows ni se altera el sistema de instalación de mods.
+
+Para que la apariencia siga siendo segura al actualizar, la nueva capa se aplica con `patches/sakura_themes.py` después de `patches/wallpaper_news_launcher.py`. Sus sustituciones exigen coincidencias únicas y detienen la compilación si el código upstream cambia. Es necesario validar la compilación Windows antes de publicar la siguiente Release.
+
 ## Ajustes visuales refinados
 
 El panel izquierdo ahora tiene una **columna de 112 px y una barra Sakura de 88 px**, desplazada 16 px hacia el interior. Los controles redondos de Inicio y perfil caben completos en su borde. Los controles personalizados de la ventana, situados en la esquina superior derecha, y los menús desplegables de cuenta utilizan la misma paleta ciruela/rosa del launcher, incluidos los modos claro y alto contraste.
 
 En **Ajustes → Apariencia → Fondo de Eternal**, los modos se ofrecen como **tres botones**: **Sincronizado**, **Sakura** y **Personalizado**. Solo al seleccionar Personalizado aparece la opción de elegir/cambiar JPG, PNG, WebP o GIF; la elección sigue guardándose localmente. Los fondos mantienen el filtro de seguridad de **22 MiB** y los límites de resolución. El ajuste de partículas muestra **Sincronizado** en lugar de «Predeterminado (sincronizado)».
 
-Las partículas se montan desde `branding/particles.vue` dentro del viewport real de Vue, sin observadores temporales de DOM. Esto evita que desaparezcan cuando Modrinth tarda en inicializar y mantiene las animaciones restringidas a la pantalla de Inicio; siguen desactivadas cuando el usuario elige esa opción o reduce el movimiento del sistema.
+Las partículas se montan desde `branding/particles.vue` mediante Vue Teleport a una capa decorativa sobre Inicio (no dentro de las capas recortables del viewport). No usan observadores temporales ni capturan clics; continúan desactivadas cuando se elige esa opción o cuando el sistema reduce movimiento.
 
 ## Fondo personalizado
 
-En **Ajustes → Apariencia → Fondo de Eternal** puedes seleccionar **Predeterminado (sincronizado)**, **Sakura (integrado)** o **Personalizado**. El modo personalizado permite JPG, PNG, WebP y GIF animados de hasta **22 MB**. El selector conserva la ilustración Sakura incluida en cada compilación. Las imágenes fijas se reducen y guardan en localStorage; los GIF animados se almacenan como archivos Blob en IndexedDB para conservar todos sus fotogramas.
+En **Ajustes → Apariencia → Fondo de Eternal** puedes seleccionar **Sincronizado**, **Sakura (integrado)** o **Personalizado**. El modo personalizado permite JPG, PNG, WebP y GIF animados de hasta **22 MB**. El selector conserva la ilustración Sakura incluida en cada compilación. Las imágenes fijas se reducen y guardan en localStorage; los GIF animados se almacenan como archivos Blob en IndexedDB para conservar todos sus fotogramas.
 
 Las fotografías (no GIF) se **reducen localmente** a un máximo de 1920×1080 y se guardan comprimidas en el almacenamiento local del WebView. Los GIF válidos se conservan animados en IndexedDB (sujetos a la cuota de almacenamiento disponible). No se suben a ningún servicio ni se añaden permisos de sistema. Si se borran los datos del WebView, la personalización se perderá.
 
@@ -72,7 +81,7 @@ Para usar la ilustración remota, sube `public-news/wallpapers/default.webp` a G
 
 Valores admitidos en `particles`: `"sakura"`, `"lava"`, `"otono"`, `"primavera"`, `"navidad"` o `"none"`. Se consulta únicamente JSON pequeño (máximo 4 KB) por HTTPS; los enlaces de fondo quedan restringidos al mismo origen, sin HTML, JavaScript ni acceso al sistema de archivos.
 
-En **Ajustes → Apariencia**, el selector de colores solo muestra **OLED**, **Luz** y **Sincronizar con el sistema**. Los usuarios que antes utilizaban el tema Oscuro pasan automáticamente a OLED sin modificar Minecraft. El modal Ajustes y el selector de cuenta de Minecraft usan también Sakura Glass.
+En **Ajustes → Apariencia**, el selector de colores muestra **Sakura**, **OLED**, **Luz** y **Sincronizar con el sistema**. En una instalación nueva y durante la migración desde la antigua edición de cristal rosa se prefiere Sakura. En OLED se conservan el fondo, la marca y los botones rosa de Eternal, pero los menús de Ajustes, creación de instancias y exploración de modpacks utilizan superficies negras. La selección local se guarda en `eternal.theme.choice.v1`; el backend nativo de Modrinth continúa recibiendo únicamente temas admitidos por su enum, y la sincronización de cuenta representa Sakura mediante OLED.
 
 ## Noticias remotas (sin actualizar el ejecutable)
 
