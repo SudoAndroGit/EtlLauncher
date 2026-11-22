@@ -22,6 +22,15 @@ Compilación privada y **no oficial** de Modrinth App, basada en el código fuen
 
 La comprobación automática está programada cada seis horas. Solo construye versiones no compiladas previamente de forma satisfactoria; una ejecución manual siempre inicia una nueva compilación.
 
+## Publicar un instalador descargable en Releases
+
+1. Abre **Actions → Build EtlLauncher (experimental) → Run workflow**.
+2. Marca **Publish a private GitHub Release after the build succeeds**.
+3. Ejecuta sobre `main`. El workflow genera un instalador fresco y solo publica si la compilación termina bien.
+4. Descarga el instalador y el archivo `SHA256SUMS.txt` desde **Releases**: https://github.com/WildMCs/EtlLauncher/releases
+
+Las publicaciones se crean como **pre-releases experimentales** identificadas por versión upstream y número de ejecución, por ejemplo `etl-v0.23.4-build.25.1`. Quedan en el repositorio privado: solo usuarios autorizados pueden descargarlas. Las compilaciones automáticas de cada seis horas **no publican releases por su cuenta**.
+
 ## Estructura
 
 - `.github/workflows/build.yml`: descarga el código oficial, aplica parches y genera instalador NSIS.
