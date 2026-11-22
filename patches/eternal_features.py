@@ -137,13 +137,22 @@ def configure_discord_presence() -> None:
         "            return false; // No application configured; do not use Modrinth's RPC identity.\n"
         "        }\n",
     )
+    # Translate the two upstream states at the shared RPC entry point. This
+    # also covers activities emitted from the launcher and after game exit.
     replace_once(
         discord,
         '        let activity = Activity::new().state(msg).assets(',
-        '        let activity = Activity::new().details("EternalLauncher").state(msg).assets(',
+        '        let (details, state) = if msg == "Idling..." {\n'
+        '            ("Ausente (｡-ω-) zzZ".to_string(), "Disfrutando de un descansito 🌸".to_string())\n'
+        '        } else if let Some(instance) = msg.strip_prefix("Playing ") {\n'
+        '            (format!("Jugando: {instance}"), "¡De aventura! (ง •̀ω•́)ง".to_string())\n'
+        '        } else {\n'
+        '            ("EternalLauncher".to_string(), msg.to_string())\n'
+        '        };\n'
+        '        let activity = Activity::new().details(details.as_str()).state(state.as_str()).assets(',
     )
     replace_once(discord, '.large_image("modrinth_simple")', '.large_image("eternal_logo")')
-    replace_once(discord, '.large_text("Modrinth Logo")', '.large_text("EternalLauncher")')
+    replace_once(discord, '.large_text("Modrinth Logo")', '.large_text("EternalLauncher 🌸")')
     # The privacy switch should describe the actual customized activity.
     privacy = FRONTEND / "features/settings/account/privacy-settings.vue"
     replace_once(
