@@ -9,11 +9,11 @@
 - **Discord Rich Presence:** identidad de la aplicación **EternalLauncher** y recurso de imagen `eternal_logo`, solo cuando se configura una aplicación propia de Discord (ver abajo).
 - **Tema único Sakura Glass:** cristal rosa con transparencias suaves, barra superior y laterales translúcidos, navegación redondeada y tarjetas ligeras. Conserva el icono personalizado.
 
-## Tema Sakura Glass 🌸
+## Tema Sakura Glass
 
 El tema se aplica automáticamente en cada compilación usando `branding/theme.css`. **No se añadió ningún motor de temas** ni se modificó la estructura de Vue o Rust: los ajustes siguen funcionando como en el launcher original y el parche es fácil de revertir.
 
-- Fondo con degradados rosa/lavanda, sin imágenes externas ni animaciones adicionales.
+- Fondo Sakura predeterminado integrado en el instalador como WebP (1920 × 1280). Funciona sin Internet y admite fotografía local alternativa.
 - Barra superior, navegación izquierda y panel derecho con efecto de cristal rosa, mayor transparencia y reflejos blancos suaves.
 - Tarjetas de instancias y «Continuar» translúcidas, con bordes más redondos; botones principales ligeramente más redondeados, conservando sus tamaños, tipografía y funcionamiento. **Sin desenfoque por tarjeta**, para no castigar bibliotecas grandes.
 - Compatibilidad con modo claro/oscuro, reducción de transparencia y el ajuste de renderizado avanzado (desactiva el blur).
@@ -21,11 +21,15 @@ El tema se aplica automáticamente en cada compilación usando `branding/theme.c
 
 Para deshacer este aspecto, basta con revertir los cambios CSS de `branding/theme.css`; no afecta a instancias, mods o partidas. La apariencia definitiva aún debe revisarse en Windows después de que el workflow compile.
 
-## Fondo personalizado 🌸
+## Fondo personalizado
 
-En **Ajustes → Apariencia → Fondo de Eternal** puedes seleccionar un JPG, PNG o WebP de hasta 12 MB y restaurar el fondo Sakura Glass cuando quieras.
+En **Ajustes → Apariencia → Fondo de Eternal** puedes seleccionar un JPG, PNG o WebP de hasta **32 MB** y restaurar la ilustración Sakura predeterminada cuando quieras. El launcher conserva la imagen original incluida en cada compilación.
 
-La fotografía se **reduce localmente** a un máximo aproximado de 1920×1080 y se guarda comprimida en el almacenamiento local del WebView. No se sube a ningún servicio, no se añaden permisos de acceso a archivos y no cambia tus instalaciones. El fondo Sakura Glass original es el predeterminado. Si se borran los datos del WebView, la personalización se perderá.
+La fotografía seleccionada se **reduce localmente** a un máximo de 1920×1080 y se guarda comprimida en el almacenamiento local del WebView. No se sube a ningún servicio ni se añaden permisos de acceso a archivos. Si se borran los datos del WebView, la personalización se perderá.
+
+Dos deslizadores se aplican en tiempo real al fondo predeterminado o al personalizado: **Oscurecimiento** (capa oscura, 0–100 %) y **Desvanecimiento** (opacidad de la imagen, 0–100 %). Ambos valores se guardan localmente y persisten al reiniciar.
+
+El archivo de fondo está incluido como `branding/default-sakura.webp.b64` para que GitHub pueda almacenar la imagen sin un plugin adicional; `patches/brand_launcher.py` lo descodifica como `apps/app-frontend/public/eternal-default-sakura.webp` durante la compilación. Para cambiar el fondo integrado en otra versión, sustituye el Base64 por otra imagen WebP.
 
 ## Noticias remotas (sin actualizar el ejecutable)
 
