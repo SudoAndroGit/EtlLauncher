@@ -288,23 +288,24 @@
 }
 
 /* Only standard Modrinth buttons; exclude intentional circular icon buttons.
- * Focus rings, sizes, disabled states, and icon placement remain upstream.
+ * Avoid custom shadows on focus-visible to preserve Modrinth's keyboard ring.
+ * Sizes, disabled states and icon placement remain upstream.
  */
 .app-contents [data-button]:not([class*="rounded-full"]),
 .app-grid-layout .app-title-bar [data-button]:not([class*="rounded-full"]) {
   border-radius: 16px !important;
 }
 
-.app-contents [data-button].button-frame--base:not([class*="rounded-full"]),
-.app-contents [data-button].button-frame--colored-text:not([class*="rounded-full"]),
-.app-grid-layout .app-title-bar [data-button].button-frame--base:not([class*="rounded-full"]) {
+.app-contents [data-button].button-frame--base:not([class*="rounded-full"]):not(:focus-visible),
+.app-contents [data-button].button-frame--colored-text:not([class*="rounded-full"]):not(:focus-visible),
+.app-grid-layout .app-title-bar [data-button].button-frame--base:not([class*="rounded-full"]):not(:focus-visible) {
   box-shadow:
     inset 0 1px 0 var(--eternal-glass-white-reflection),
     0 0 0 1px var(--eternal-glass-outline),
     0 5px 15px -11px var(--eternal-glass-shadow);
 }
 
-.app-contents [data-button].button-frame--colored:not([class*="rounded-full"]) {
+.app-contents [data-button].button-frame--colored:not([class*="rounded-full"]):not(:focus-visible) {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.55),
     inset 0 -1px 0 rgba(84,25,68,.14),
