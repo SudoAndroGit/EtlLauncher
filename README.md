@@ -21,6 +21,14 @@ El tema se aplica automáticamente en cada compilación usando `branding/theme.c
 
 Para deshacer este aspecto, basta con revertir los cambios CSS de `branding/theme.css`; no afecta a instancias, mods o partidas. La apariencia definitiva aún debe revisarse en Windows después de que el workflow compile.
 
+## Ajustes visuales refinados
+
+El panel izquierdo ahora tiene una **columna de 112 px y una barra Sakura de 88 px**, desplazada 16 px hacia el interior. Los controles redondos de Inicio y perfil caben completos en su borde. Los controles personalizados de la ventana, situados en la esquina superior derecha, y los menús desplegables de cuenta utilizan la misma paleta ciruela/rosa del launcher, incluidos los modos claro y alto contraste.
+
+En **Ajustes → Apariencia → Fondo de Eternal**, los modos se ofrecen como **tres botones**: **Sincronizado**, **Sakura** y **Personalizado**. Solo al seleccionar Personalizado aparece la opción de elegir/cambiar JPG, PNG, WebP o GIF; la elección sigue guardándose localmente. Los fondos mantienen el filtro de seguridad de **22 MiB** y los límites de resolución. El ajuste de partículas muestra **Sincronizado** en lugar de «Predeterminado (sincronizado)».
+
+Las partículas se montan desde `branding/particles.vue` dentro del viewport real de Vue, sin observadores temporales de DOM. Esto evita que desaparezcan cuando Modrinth tarda en inicializar y mantiene las animaciones restringidas a la pantalla de Inicio; siguen desactivadas cuando el usuario elige esa opción o reduce el movimiento del sistema.
+
 ## Fondo personalizado
 
 En **Ajustes → Apariencia → Fondo de Eternal** puedes seleccionar **Predeterminado (sincronizado)**, **Sakura (integrado)** o **Personalizado**. El modo personalizado permite JPG, PNG, WebP y GIF animados de hasta **22 MB**. El selector conserva la ilustración Sakura incluida en cada compilación. Las imágenes fijas se reducen y guardan en localStorage; los GIF animados se almacenan como archivos Blob en IndexedDB para conservar todos sus fotogramas.
@@ -46,7 +54,7 @@ El archivo de fondo está incluido como `branding/default-sakura.webp.b64` para 
 
 ## Animaciones y opciones sincronizadas
 
-En **Ajustes → Apariencia → Animación del menú principal**, las partículas son opcionales y solo aparecen en la biblioteca de inicio. Se incluyen seis opciones: **Predeterminado (sincronizado)**, **Sakura**, **Lava**, **Otoño**, **Primavera**, **Navidad**, además de **Desactivadas**. Son 14 partículas decorativas CSS; no contienen scripts remotos, no interceptan clics y se desactivan automáticamente cuando el sistema pide reducir el movimiento.
+En **Ajustes → Apariencia → Animación del menú principal**, las partículas son opcionales y solo aparecen en la biblioteca de inicio. Se incluyen seis opciones: **Predeterminado (sincronizado)**, **Sakura**, **Lava**, **Otoño**, **Primavera**, **Navidad**, además de **Desactivadas**. Son 18 partículas decorativas CSS; no contienen scripts remotos, no interceptan clics y se desactivan automáticamente cuando el sistema pide reducir el movimiento.
 
 Los modos **Predeterminado** del fondo y de las partículas leen al iniciar el launcher, una única vez, el archivo público `appearance.json` del mismo dominio que `branding/news-config.json`. Con la URL configurada actualmente, es `https://new.etlservers.moe/appearance.json`. El archivo en GitHub es `public-news/appearance.json` y Cloudflare Pages lo publica junto con las noticias. No hay comprobaciones periódicas: los cambios remotos entran al **volver a abrir Eternal**.
 
