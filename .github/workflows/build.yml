@@ -111,6 +111,11 @@ jobs:
         shell: pwsh
         run: python patches/wallpaper_news_launcher.py
 
+      - name: Install Sakura default and OLED-black menu modes
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: python patches/sakura_themes.py
+
       - name: Disable optional telemetry and remote error reports
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
