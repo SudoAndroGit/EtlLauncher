@@ -1,53 +1,64 @@
-# EtlLauncher Sakura Edition 🌸
+# EternalLauncher — Sakura Edition 🌸
 
-Compilación privada y **no oficial** de Modrinth App, basada en el código fuente original. No está afiliada a Rinth, Inc.
+**EternalLauncher** es una compilación privada y no oficial de Modrinth App con parches propios. No está afiliada a Rinth, Inc. El repositorio conserva por ahora el nombre histórico `WildMCs/EtlLauncher`.
 
-## Personalizaciones automáticas
+## Identidad
 
-- Ventana e instalador: `EtlLauncher`.
-- Oculta los anuncios de la interfaz principal (no elimina todo el código publicitario).
-- Desactiva las actualizaciones del instalador original.
-- Desactiva reportes de errores remotos a Sentry, mantiene las analíticas opcionales apagadas y muestra la telemetría deshabilitada en Privacidad.
-- Sustituye el logo principal de la barra superior y pantalla de carga por el icono rosa sakura.
-- Genera iconos de Windows (incluido `.ico`) con la herramienta de Tauri.
-- Ajusta los colores verdes y el tema de marca a rosa pastel; mantiene superficies oscuras.
-- Muestra `EtlLauncher` en el título y el panel de configuración.
+- **Ejecutable/instalador:** `EternalLauncher`.
+- **Nombre mostrado dentro del launcher:** **Eternal** (barra superior, bienvenida, pantalla de carga y ajustes).
+- **Discord Rich Presence:** identidad de la aplicación **EternalLauncher** y recurso de imagen `eternal_logo`, solo cuando se configura una aplicación propia de Discord (ver abajo).
+- Tema rosa Sakura e icono personalizado.
+
+## Cambios de interfaz y privacidad
+
+- Oculta la entrada de **Modrinth Hosting** del menú lateral. Mantiene las APIs necesarias para instalaciones, descargas y funciones online; **no** modifica el servicio de pago ni elimina todo el código de Hosting.
+- Sustituye el panel lateral de noticias por la **bienvenida editable a la primera versión**. No realiza peticiones para cargar noticias en ese panel.
+- Oculta publicidad y la opción de suscripción Modrinth+ del menú de perfil.
+- Desactiva el actualizador oficial para no sustituir la versión personalizada.
+- Desactiva la inicialización de Sentry y fuerza la telemetría opcional a OFF. Las conexiones necesarias con Modrinth/Minecraft siguen funcionando.
+
+## Personalizar la bienvenida
+
+Edita **`branding/welcome.json`** (texto del encabezado, título, descripción, lista de características y mensaje final). La próxima compilación incorporará los cambios. El componente visual está en `branding/welcome-sidebar.vue`; no necesitas modificar los archivos descargados de Modrinth.
+
+## Configurar Discord Rich Presence
+
+Discord determina **el nombre y el icono de la actividad** a partir de una aplicación registrada en su Developer Portal, no del nombre del ejecutable.
+
+1. Entra a https://discord.com/developers/applications y crea una aplicación **EternalLauncher**.
+2. En sus ajustes de Rich Presence/Art Assets, sube tu logo Sakura con el nombre exacto **`eternal_logo`**. La propagación de nuevos recursos puede tardar.
+3. Copia el **Application ID**, que es un identificador público numérico (**no es un bot token**).
+4. En el repositorio GitHub abre **Settings → Secrets and variables → Actions → Variables → New repository variable**. Crea `ETERNAL_DISCORD_CLIENT_ID` con ese ID.
+5. Ejecuta de nuevo el workflow de compilación y activa Rich Presence en la sección Privacidad del launcher.
+
+**Si la variable no está configurada**, la integración de Discord se mantiene desactivada en vez de mostrar el nombre y logo oficiales de Modrinth. No hace falta crear un bot, usar un token ni abrir puertos.
 
 ## Construir
 
-1. Abrir **Actions → Build EtlLauncher (experimental) → Run workflow**.
-2. Esperar a que el trabajo Windows x64 finalice con éxito.
-3. Descargar el artefacto privado `EtlLauncher-vX.Y.Z-windows-x64`.
-4. Extraer el `.exe` del ZIP e instalarlo después de respaldar las instancias.
+1. Abre **Actions → Build EternalLauncher (experimental) → Run workflow**.
+2. Descarga el artefacto `EternalLauncher-vX.Y.Z-windows-x64` cuando termine correctamente.
+3. Extrae el instalador `.exe` y haz una copia de seguridad de las instancias antes de instalar.
 
-La comprobación automática está programada cada seis horas. Solo construye versiones no compiladas previamente de forma satisfactoria; una ejecución manual siempre inicia una nueva compilación.
+El workflow revisa las versiones oficiales cada seis horas; los cambios en `patches/**`, `branding/**` y el workflow inician una nueva compilación. Los parches fallan explícitamente si cambia una sección esencial del código fuente original.
 
-## Publicar un instalador descargable en Releases
+## Publicar una Release privada
 
-1. Abre **Actions → Build EtlLauncher (experimental) → Run workflow**.
-2. Marca **Publish a private GitHub Release after the build succeeds**.
-3. Ejecuta sobre `main`. El workflow genera un instalador fresco y solo publica si la compilación termina bien.
-4. Descarga el instalador y el archivo `SHA256SUMS.txt` desde **Releases**: https://github.com/WildMCs/EtlLauncher/releases
-
-Las publicaciones se crean como **pre-releases experimentales** identificadas por versión upstream y número de ejecución, por ejemplo `etl-v0.23.4-build.25.1`. Quedan en el repositorio privado: solo usuarios autorizados pueden descargarlas. Las compilaciones automáticas de cada seis horas **no publican releases por su cuenta**.
+En **Run workflow**, marca **Publish a private GitHub Release after the build succeeds** para publicar el instalador y su comprobación SHA-256 en https://github.com/WildMCs/EtlLauncher/releases. Las publicaciones se marcan como versiones experimentales; las automáticas no publican Releases por sí solas.
 
 ## Estructura
 
-- `.github/workflows/build.yml`: descarga el código oficial, aplica parches y genera instalador NSIS.
-- `patches/patch_launcher.py`: ajustes del nombre, anuncios y actualizador original.
-- `patches/brand_launcher.py`: añade el logo, el nombre y la hoja de colores rosa al frontend.
-- `patches/privacy_launcher.py`: suprime Sentry en el arranque y fuerza la preferencia de telemetría desactivada.
-- `branding/logo.png.b64`: copia reducida (PNG optimizado con transparencia) del logo sakura usado para la compilación.
-- `branding/theme.css`: diseño Sakura.
+- `.github/workflows/build.yml`: descarga el código oficial, aplica los parches, genera los iconos y compila NSIS.
+- `patches/patch_launcher.py`: nombre del ejecutable, anuncios y actualizador.
+- `patches/brand_launcher.py`: marca interna Eternal, iconos, colores y promoción del perfil.
+- `patches/eternal_features.py`: Hosting en navegación, bienvenida editable y Discord Rich Presence.
+- `patches/privacy_launcher.py`: privacidad de la compilación.
+- `branding/logo.png.b64`: logo transparente para el compilador.
+- `branding/theme.css`: tema rosa.
+- `branding/welcome.json` y `branding/welcome-sidebar.vue`: contenido editable de bienvenida.
 
-## Seguridad y compatibilidad
+## Avisos y compatibilidad
 
-- Los parches fallan explícitamente si cambia una sección esencial del código oficial.
-- Los ejecutables no se distribuyen públicamente: quedan en los artefactos de un repositorio privado.
-- El instalador aún no está firmado comercialmente y Windows puede advertir sobre editor desconocido.
-- Desactivar telemetría opcional **no** elimina las conexiones necesarias con Modrinth (login, API, búsqueda, descargas, servicios online), ni la actividad de red de Minecraft o sus mods. Los registros locales permanecen para diagnóstico.
-- Todavía hay que verificar esta **versión personalizada con logo y colores** mediante una compilación y prueba visual.
-- La plataforma Modrinth y sus APIs siguen siendo de Modrinth; el cambio de marca solo identifica esta compilación privada.
-- **Aviso de marca:** el diseño sakura conserva elementos de la marca original de Modrinth; su uso puede requerir permiso escrito de Rinth, Inc. No distribuyas esta variante ni la presentes como oficial.
-
-El repositorio no contiene credenciales, claves privadas ni tokens de GitHub.
+- Se conserva el identificador original de Tauri y los datos de Modrinth por compatibilidad. Si ya tienes Modrinth instalado, respalda tus instancias; el instalador personalizado puede interferir con esa instalación.
+- No hay firma comercial: Windows podría advertir sobre aplicaciones desconocidas.
+- Este es un trabajo derivado de Modrinth y continúa usando sus servicios y APIs. El logo personalizado es derivado de la marca original; su uso o distribución podría requerir permisos. **No lo presentes como un producto oficial**.
+- Las nuevas personalizaciones requieren verificar una compilación y su aspecto en Windows antes de considerarlas estables.
