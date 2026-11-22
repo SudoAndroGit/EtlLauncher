@@ -32,6 +32,7 @@ def install_wallpaper() -> None:
     shutil.copyfile(BASE / "branding/wallpaper.ts", display / "eternal-wallpaper.ts")
     shutil.copyfile(BASE / "branding/wallpaper-settings.vue", display / "eternal-wallpaper-settings.vue")
     shutil.copyfile(BASE / "branding/appearance-remote.ts", display / "eternal-appearance.ts")
+    shutil.copyfile(BASE / "branding/image-validation.ts", display / "eternal-image-validation.ts")
 
     settings = display / "appearance-settings.vue"
     replace_once(
