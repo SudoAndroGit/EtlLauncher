@@ -38,7 +38,18 @@ def main() -> None:
     replace_once(
         index,
         "<title>Modrinth App</title>",
-        '<title>EtlLauncher</title>\n\t\t<link rel="stylesheet" href="/src/etllauncher-theme.css" />',
+        '<title>EtlLauncher</title>',
+    )
+    replace_once(
+        index,
+        '<link rel="icon" type="image/svg+xml" href="/vite.svg" />',
+        '<link rel="icon" type="image/png" href="/src/assets/etllauncher-logo.png" />',
+    )
+    replace_once(
+        index,
+        '<link rel="stylesheet" href="/src/assets/stylesheets/global.scss" />',
+        '<link rel="stylesheet" href="/src/assets/stylesheets/global.scss" />'
+        '\n\t\t<link rel="stylesheet" href="/src/etllauncher-theme.css" />',
     )
 
     title = FRONTEND / "app/shell/title-bar/index.vue"
