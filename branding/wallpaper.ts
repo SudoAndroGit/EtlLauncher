@@ -99,8 +99,22 @@ export function getEternalSidebarTransparency(): number {
 }
 
 function renderEternalSidebarTransparency(transparency: number): void {
-	const fraction = ((100 - transparency) / 100).toFixed(2)
-	document.documentElement.style.setProperty('--eternal-sidebar-visibility', fraction)
+	const fraction = (100 - transparency) / 100
+	// Compute alpha in JavaScript rather than depending on CSS calc() multiplication.
+	const alphas: Array<[string, number]> = [
+		['--eternal-sidebar-dark-shell-alpha', .38],
+		['--eternal-sidebar-dark-module-alpha', .45],
+		['--eternal-sidebar-dark-highlight-alpha', .045],
+		['--eternal-sidebar-dark-news-alpha', .55],
+		['--eternal-sidebar-light-shell-alpha', .62],
+		['--eternal-sidebar-light-module-alpha', .80],
+		['--eternal-sidebar-light-highlight-alpha', .91],
+		['--eternal-sidebar-light-news-alpha', .78],
+	]
+	for (const [property, baseAlpha] of alphas) {
+		document.documentElement.style.setProperty(property, (baseAlpha * fraction).toFixed(3))
+	}
+	document.documentElement.dataset.eternalSidebarClear = transparency === 100 ? 'true' : 'false'
 	document.documentElement.style.setProperty(
 		'--eternal-sidebar-backdrop',
 		transparency === 100 ? 'none' : 'blur(14px) saturate(115%)',
