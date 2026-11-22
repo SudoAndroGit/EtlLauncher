@@ -44,7 +44,14 @@ def main() -> None:
         "if (showAds) {\n\t\t\tawait init_ads_window(true)",
         "if (false && showAds) {\n\t\t\tawait init_ads_window(true)",
     )
-    print("EtlLauncher name and ad-visibility patch applied.")
+    # Disable official update checks, which would replace this customized build.
+    utils = ROOT / "apps/app-frontend/src/helpers/utils.js"
+    replace_once(
+        utils,
+        "export async function areUpdatesEnabled() {\\n\\treturn await invoke('are_updates_enabled')\\n}",
+        "export async function areUpdatesEnabled() {\\n\\treturn false\\n}",
+    )
+    print("EtlLauncher name, ad UI and updater patch applied.")
     print("Note: backend ad code remains; this is NOT a complete removal of ad infrastructure.")
 
 if __name__ == "__main__":
