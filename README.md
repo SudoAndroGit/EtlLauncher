@@ -23,15 +23,37 @@ Para deshacer este aspecto, basta con revertir los cambios CSS de `branding/them
 
 ## Fondo personalizado
 
-En **Ajustes → Apariencia → Fondo de Eternal** puedes seleccionar un JPG, PNG o WebP de hasta **32 MB** y restaurar la ilustración Sakura predeterminada cuando quieras. El launcher conserva la imagen original incluida en cada compilación.
+En **Ajustes → Apariencia → Fondo de Eternal** puedes seleccionar **Predeterminado (sincronizado)**, **Sakura (integrado)** o **Personalizado**. El modo personalizado permite JPG, PNG, WebP y GIF animados de hasta **32 MB**. El selector conserva la ilustración Sakura incluida en cada compilación. Las imágenes fijas se reducen y guardan en localStorage; los GIF animados se almacenan como archivos Blob en IndexedDB para conservar todos sus fotogramas.
 
-La fotografía seleccionada se **reduce localmente** a un máximo de 1920×1080 y se guarda comprimida en el almacenamiento local del WebView. No se sube a ningún servicio ni se añaden permisos de acceso a archivos. Si se borran los datos del WebView, la personalización se perderá.
+Las fotografías (no GIF) se **reducen localmente** a un máximo de 1920×1080 y se guardan comprimidas en el almacenamiento local del WebView. Los GIF se conservan animados en IndexedDB (sujetos a la cuota de almacenamiento disponible). No se suben a ningún servicio ni se añaden permisos de sistema. Si se borran los datos del WebView, la personalización se perderá.
 
 En **Ajustes → Apariencia → Fondo de Eternal**, dos deslizadores se aplican en tiempo real al fondo predeterminado o al personalizado: **Oscurecimiento** (capa oscura, 0–100 %) y **Desenfoque** (0–24 px, solo sobre la imagen). Reemplazamos el antiguo desvanecimiento por desenfoque. Se conserva el oscurecimiento de instalaciones anteriores; los nuevos ajustes se guardan localmente y persisten al reiniciar.
 
 En esa misma pantalla, el bloque **Panel derecho** permite ajustar la **Transparencia del panel derecho** de 0 a 100 %. Al 0 % conserva la opacidad actual de cuenta, amigos y noticias. Al 100 % elimina sus fondos de cristal y el blur, sin desvanecer los textos; los controles siguen siendo funcionales. El valor se guarda localmente. La barra de navegación izquierda también es un poco más ancha y está desplazada hacia la derecha para que los iconos seleccionados no se recorten.
 
 El archivo de fondo está incluido como `branding/default-sakura.webp.b64` para que GitHub pueda almacenar la imagen sin un plugin adicional; `patches/brand_launcher.py` lo descodifica como `apps/app-frontend/public/eternal-default-sakura.webp` durante la compilación. Para cambiar el fondo integrado en otra versión, sustituye el Base64 por otra imagen WebP.
+
+## Animaciones y opciones sincronizadas
+
+En **Ajustes → Apariencia → Animación del menú principal**, las partículas son opcionales y solo aparecen en la biblioteca de inicio. Se incluyen seis opciones: **Predeterminado (sincronizado)**, **Sakura**, **Lava**, **Otoño**, **Primavera**, **Navidad**, además de **Desactivadas**. Son 14 partículas decorativas CSS; no contienen scripts remotos, no interceptan clics y se desactivan automáticamente cuando el sistema pide reducir el movimiento.
+
+Los modos **Predeterminado** del fondo y de las partículas leen al iniciar el launcher, una única vez, el archivo público `appearance.json` del mismo dominio que `branding/news-config.json`. Con la URL configurada actualmente, es `https://new.etlservers.moe/appearance.json`. El archivo en GitHub es `public-news/appearance.json` y Cloudflare Pages lo publica junto con las noticias. No hay comprobaciones periódicas: los cambios remotos entran al **volver a abrir Eternal**.
+
+Ejemplo de configuración pública:
+
+```json
+{
+  "version": 1,
+  "wallpaper": "/wallpapers/default.webp",
+  "particles": "sakura"
+}
+```
+
+Para usar la ilustración remota, sube `public-news/wallpapers/default.webp` a GitHub; Pages la publicará en `https://new.etlservers.moe/wallpapers/default.webp`. La ruta puede apuntar a JPG, PNG, WebP o GIF del **mismo dominio HTTPS**. Si `wallpaper` queda vacío, la URL falla o no hay conexión, usa el Sakura integrado como respaldo. Si la persona elige **Sakura** o **Personalizado**, el fondo remoto deja de tener prioridad; si escoge una animación concreta o **Desactivadas**, la animación remota también deja de tener prioridad. Son dos opciones independientes y locales.
+
+Valores admitidos en `particles`: `"sakura"`, `"lava"`, `"otono"`, `"primavera"`, `"navidad"` o `"none"`. Se consulta únicamente JSON pequeño (máximo 4 KB) por HTTPS; los enlaces de fondo quedan restringidos al mismo origen, sin HTML, JavaScript ni acceso al sistema de archivos.
+
+En **Ajustes → Apariencia**, el selector de colores solo muestra **OLED**, **Luz** y **Sincronizar con el sistema**. Los usuarios que antes utilizaban el tema Oscuro pasan automáticamente a OLED sin modificar Minecraft. El modal Ajustes y el selector de cuenta de Minecraft usan también Sakura Glass.
 
 ## Noticias remotas (sin actualizar el ejecutable)
 
