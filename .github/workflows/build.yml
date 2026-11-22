@@ -122,6 +122,13 @@ jobs:
         with:
           node-version-file: upstream/.nvmrc
 
+      - name: Validate Eternal image security checks
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          node --test tests/image-validation.test.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Eternal wallpaper security tests failed' }
+
       - name: Setup pnpm
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
