@@ -111,7 +111,13 @@ async function readLimitedImage(url: string): Promise<Blob | null> {
       reader.releaseLock()
     }
     if (!total) return null
-    return new Blob(parts, { type: declaredType })
+    const assembled = new Uint8Array(total)
+    let offset = 0
+    for (const part of parts) {
+      assembled.set(part, offset)
+      offset += part.byteLength
+    }
+    return new Blob([assembled.buffer], { type: declaredType })
   } catch {
     return null
   } finally {
