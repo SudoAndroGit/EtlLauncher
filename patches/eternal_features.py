@@ -144,6 +144,18 @@ def configure_discord_presence() -> None:
     )
     replace_once(discord, '.large_image("modrinth_simple")', '.large_image("eternal_logo")')
     replace_once(discord, '.large_text("Modrinth Logo")', '.large_text("EternalLauncher")')
+    # The privacy switch should describe the actual customized activity.
+    privacy = FRONTEND / "features/settings/account/privacy-settings.vue"
+    replace_once(
+        privacy,
+        "id: 'app.settings.privacy.discord-rich-presence.description'",
+        "id: 'eternal.settings.privacy.discord-rich-presence.description'",
+    )
+    replace_once(
+        privacy,
+        "'Show Modrinth App as your current activity on Discord. This does not affect Rich Presence added to instances by mods. Requires an app restart.',",
+        "'Muestra EternalLauncher en Discord al configurar una aplicación propia. No afecta a las actividades añadidas por mods. Reinicia el launcher tras cambiar este ajuste.',",
+    )
 
 
 def main() -> None:
