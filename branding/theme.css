@@ -913,3 +913,128 @@
     box-shadow: none !important;
   }
 }
+
+
+/* === Eternal Glassy v3.3 — spacious navigation and configurable right glass ===
+ * User-facing preferences are applied as CSS custom properties by wallpaper.ts.
+ * No change to HTML hierarchy, icon sizing, account logic, or fonts.
+ */
+
+/* Larger rail with 13px inner side padding and 16px window-edge inset.
+ * A 48px icon now fits fully inside the 76px rail (including its border).
+ */
+.app-grid-layout.app-grid-layout,
+.app-contents.app-contents {
+  --left-bar-width: 6.5rem;
+}
+.app-grid-layout .app-grid-navbar {
+  width: calc(var(--left-bar-width) - 28px) !important;
+  margin: 10px 8px 10px 16px !important;
+  padding: 11px 13px !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  border-radius: 20px !important;
+}
+.app-grid-layout .app-grid-navbar > .nav-button {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  flex: 0 0 48px;
+  align-self: center;
+}
+.app-grid-layout .app-grid-navbar [data-button]:has(> .avatar.circle) {
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* Only blur the photographic wallpaper, not the shell or text.
+ * Scale slightly to avoid exposed seams at the maximum 24px blur.
+ */
+:root {
+  --eternal-wallpaper-blur: 0px;
+  --eternal-sidebar-visibility: 1;
+  --eternal-sidebar-backdrop: blur(14px) saturate(115%);
+  --eternal-sidebar-card-backdrop: blur(8px) saturate(110%);
+}
+.app-grid-layout.app-grid-layout::before {
+  filter: blur(var(--eternal-wallpaper-blur, 0px));
+  transform: scale(1.04);
+  opacity: 1;
+}
+
+/* 0% transparency means the current glass. 100% removes the backgrounds
+ * of the right rail AND its account/friends/news glass modules. The UI still
+ * receives input normally; only visual background alpha is adjustable.
+ */
+:root {
+  --eternal-glass-sidebar: rgba(38, 22, 40, calc(.38 * var(--eternal-sidebar-visibility, 1)));
+  --eternal-glass-module-bg: rgba(38, 22, 40, calc(.45 * var(--eternal-sidebar-visibility, 1)));
+  --eternal-glass-news-bg:
+    linear-gradient(
+      150deg,
+      rgba(255, 255, 255, calc(.045 * var(--eternal-sidebar-visibility, 1))),
+      rgba(44, 25, 46, calc(.55 * var(--eternal-sidebar-visibility, 1)))
+    );
+}
+:root.light-mode,
+.light-mode,
+:root.light,
+.light {
+  --eternal-glass-sidebar: rgba(255, 246, 251, calc(.62 * var(--eternal-sidebar-visibility, 1)));
+  --eternal-glass-module-bg: rgba(255, 247, 252, calc(.80 * var(--eternal-sidebar-visibility, 1)));
+  --eternal-glass-news-bg:
+    linear-gradient(
+      150deg,
+      rgba(255, 255, 255, calc(.91 * var(--eternal-sidebar-visibility, 1))),
+      rgba(255, 243, 251, calc(.78 * var(--eternal-sidebar-visibility, 1)))
+    );
+}
+.app-contents .app-sidebar {
+  background: var(--eternal-glass-sidebar) !important;
+}
+.app-contents .app-sidebar .sidebar-default-content > div.p-4 {
+  background: var(--eternal-glass-module-bg) !important;
+}
+.app-contents .app-sidebar .eternal-welcome-card {
+  background: var(--eternal-glass-news-bg) !important;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .app-contents:not(.disable-advanced-rendering) .app-sidebar {
+    backdrop-filter: var(--eternal-sidebar-backdrop) !important;
+    -webkit-backdrop-filter: var(--eternal-sidebar-backdrop) !important;
+  }
+  .app-contents:not(.disable-advanced-rendering) .app-sidebar .sidebar-default-content > div.p-4,
+  .app-contents:not(.disable-advanced-rendering) .app-sidebar .eternal-welcome-card {
+    backdrop-filter: var(--eternal-sidebar-card-backdrop) !important;
+    -webkit-backdrop-filter: var(--eternal-sidebar-card-backdrop) !important;
+  }
+}
+/* Honor reduced-transparency preferences and Windows high-contrast themes. */
+@media (prefers-reduced-transparency: reduce) {
+  .app-grid-layout.app-grid-layout::before {
+    filter: none;
+    transform: none;
+    opacity: .30;
+  }
+  .app-contents .app-sidebar,
+  .app-contents .app-sidebar .sidebar-default-content > div.p-4,
+  .app-contents .app-sidebar .eternal-welcome-card {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .app-grid-layout.app-grid-layout::before {
+    filter: none !important;
+    transform: none !important;
+  }
+  .app-contents .app-sidebar,
+  .app-contents .app-sidebar .sidebar-default-content > div.p-4,
+  .app-contents .app-sidebar .eternal-welcome-card {
+    background: Canvas !important;
+    border-color: CanvasText !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
