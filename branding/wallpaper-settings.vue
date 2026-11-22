@@ -2,11 +2,16 @@
 import { ref } from 'vue'
 
 import {
+	getEternalWallpaperEffects,
 	hasEternalWallpaper,
 	resetEternalWallpaper,
 	setEternalWallpaper,
+	setEternalWallpaperEffects,
 } from './eternal-wallpaper'
 
+const initialEffects = getEternalWallpaperEffects()
+const darkness = ref(initialEffects.darkness)
+const fade = ref(initialEffects.fade)
 const input = ref<HTMLInputElement | null>(null)
 const custom = ref(hasEternalWallpaper())
 const busy = ref(false)
@@ -32,6 +37,10 @@ async function selectImage(event: Event) {
 	}
 }
 
+function updateEffects() {
+	setEternalWallpaperEffects(darkness.value, fade.value)
+}
+
 function restoreDefault() {
 	try {
 		resetEternalWallpaper()
@@ -46,8 +55,8 @@ function restoreDefault() {
 
 <template>
 	<section class="eternal-wallpaper-settings">
-		<h3>🌸 Fondo de Eternal</h3>
-		<p>Personaliza el fondo del launcher con una fotografía. Por defecto se conserva Sakura Glass.</p>
+		<h3>Fondo de Eternal</h3>
+		<p>Usa tu fotografía o el fondo Sakura predeterminado. Los cambios se aplican al momento.</p>
 		<div class="eternal-wallpaper-actions">
 			<input
 				ref="input"
@@ -69,7 +78,40 @@ function restoreDefault() {
 				Restaurar Sakura Glass
 			</button>
 		</div>
-		<p class="eternal-wallpaper-hint">Admite JPG, PNG o WebP (máx. 12 MB). Se reduce y guarda localmente; no se sube a Internet.</p>
+		<div class="eternal-wallpaper-effects">
+			<div class="eternal-wallpaper-effect">
+				<div class="eternal-wallpaper-effect-heading">
+					<label for="eternal-wallpaper-darkness">Oscurecimiento</label>
+					<output for="eternal-wallpaper-darkness">{{ darkness }}%</output>
+				</div>
+				<input
+					id="eternal-wallpaper-darkness"
+					v-model.number="darkness"
+					type="range"
+					min="0"
+					max="100"
+					step="1"
+					@input="updateEffects"
+				/>
+			</div>
+			<div class="eternal-wallpaper-effect">
+				<div class="eternal-wallpaper-effect-heading">
+					<label for="eternal-wallpaper-fade">Desvanecimiento</label>
+					<output for="eternal-wallpaper-fade">{{ fade }}%</output>
+				</div>
+				<input
+					id="eternal-wallpaper-fade"
+					v-model.number="fade"
+					type="range"
+					min="0"
+					max="100"
+					step="1"
+					@input="updateEffects"
+				/>
+			</div>
+			<p class="eternal-wallpaper-hint">El oscurecimiento añade una capa oscura; el desvanecimiento atenúa la imagen sin modificar el archivo original.</p>
+		</div>
+		<p class="eternal-wallpaper-hint">Admite JPG, PNG o WebP (máx. 32 MB). Se reduce y guarda localmente; no se sube a Internet.</p>
 		<p v-if="error" class="eternal-wallpaper-error" role="alert">{{ error }}</p>
 		<p v-else-if="notice" class="eternal-wallpaper-success" role="status">{{ notice }}</p>
 	</section>
@@ -103,6 +145,13 @@ function restoreDefault() {
 .eternal-wallpaper-actions button:disabled { opacity: .5; cursor: not-allowed; }
 .eternal-wallpaper-actions button:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
 .eternal-wallpaper-hint { font-size: .78rem; }
+.eternal-wallpaper-effects { display: flex; flex-direction: column; gap: .95rem; margin-top: 1.25rem; }
+.eternal-wallpaper-effect { display: flex; flex-direction: column; gap: .4rem; }
+.eternal-wallpaper-effect-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.eternal-wallpaper-effect-heading label { color: var(--color-contrast); font-size: .9rem; font-weight: 600; }
+.eternal-wallpaper-effect-heading output { color: var(--color-brand); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.eternal-wallpaper-effect input[type="range"] { width: 100%; accent-color: var(--color-brand); cursor: pointer; }
+.eternal-wallpaper-effect input[type="range"]:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; border-radius: .25rem; }
 .eternal-wallpaper-error { color: var(--color-red, #f55) !important; }
 .eternal-wallpaper-success { color: var(--color-brand) !important; }
 </style>
