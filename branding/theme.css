@@ -41,22 +41,22 @@
   --color-green-200: #ffd2e4 !important;
   --color-green-300: #ffc1db !important;
   --color-green-400: #f7b3d1 !important;
-  --color-green-500: #f5a9c5 !important;
+  --color-green-500: #eda3bd !important;
   --color-green-600: #e381ac !important;
   --color-green-700: #c25d8e !important;
   --color-green-800: #994473 !important;
   --color-green-900: #6c2f53 !important;
   --color-green-950: #3b1a32 !important;
-  --color-green: #f5a9c5 !important;
+  --color-green: #eda3bd !important;
   --color-green-highlight: rgba(245,169,197,.25) !important;
   --color-green-bg: rgba(245,169,197,.13) !important;
-  --color-brand: #f5a9c5 !important;
-  --color-brand-highlight: rgba(245,169,197,.22) !important;
-  --color-brand-shadow: rgba(245,169,197,.45) !important;
+  --color-brand: #eda3bd !important;
+  --color-brand-highlight: rgba(237,163,189,.18) !important;
+  --color-brand-shadow: rgba(237,163,189,.38) !important;
   --color-accent-contrast: #26141d !important;
   --brand-gradient-bg: linear-gradient(0deg, rgba(90,30,61,.25), rgba(110,43,78,.12)) !important;
-  --brand-gradient-strong-bg: linear-gradient(270deg, #20141e 10%, #2c1c29 100%) !important;
-  --brand-gradient-border: rgba(245,169,197,.13) !important;
+  --brand-gradient-strong-bg: linear-gradient(270deg, #201222 10%, #2e1b31 100%) !important;
+  --brand-gradient-border: rgba(255,255,255,.10) !important;
   --brand-gradient-fade-out-color: linear-gradient(to bottom, rgba(34,18,30,0), #241b24 80%) !important;
   --loading-bar-gradient: linear-gradient(90deg, #e381ac, #ffc1db) !important;
   --splash-tint-top: rgba(245,169,197,.18) !important;
@@ -73,20 +73,20 @@
  */
 :root {
   --eternal-glass-wallpaper:
-    radial-gradient(ellipse at 82% 8%, rgba(255, 151, 201, .31), transparent 45%),
-    radial-gradient(ellipse at 16% 83%, rgba(225, 123, 187, .23), transparent 49%),
-    linear-gradient(145deg, #30202f 0%, #211622 48%, #38233b 100%);
-  --eternal-glass-navbar: rgba(80, 39, 71, .63);
-  --eternal-glass-titlebar: rgba(88, 43, 76, .61);
-  --eternal-glass-sidebar: rgba(89, 42, 78, .63);
-  --eternal-glass-content: rgba(38, 21, 40, .42);
-  --eternal-glass-card: rgba(108, 54, 94, .53);
-  --eternal-glass-shine: rgba(255, 246, 252, .21);
-  --eternal-glass-outline: rgba(255, 236, 249, .32);
-  --eternal-glass-outline-hover: rgba(255, 196, 230, .59);
-  --eternal-glass-shadow: rgba(16, 7, 20, .45);
-  --eternal-glass-nav-selected: rgba(247, 158, 203, .34);
-  --eternal-glass-nav-hover: rgba(246, 177, 213, .20);
+    radial-gradient(ellipse at 82% 8%, rgba(157, 77, 129, .25), transparent 45%),
+    radial-gradient(ellipse at 16% 83%, rgba(146, 69, 122, .18), transparent 49%),
+    linear-gradient(145deg, #251527 0%, #1c101f 48%, #29172d 100%);
+  --eternal-glass-navbar: rgba(38, 22, 40, .66);
+  --eternal-glass-titlebar: rgba(44, 25, 46, .78);
+  --eternal-glass-sidebar: rgba(38, 22, 40, .66);
+  --eternal-glass-content: rgba(29, 16, 33, .70);
+  --eternal-glass-card: rgba(44, 25, 46, .78);
+  --eternal-glass-shine: rgba(255, 255, 255, .055);
+  --eternal-glass-outline: rgba(255, 255, 255, .10);
+  --eternal-glass-outline-hover: rgba(255, 255, 255, .20);
+  --eternal-glass-shadow: rgba(10, 2, 14, .40);
+  --eternal-glass-nav-selected: rgba(237, 163, 189, .28);
+  --eternal-glass-nav-hover: rgba(255, 255, 255, .055);
 }
 
 /* The existing Modrinth light/dark setting still controls contrast.
@@ -136,8 +136,8 @@
 .app-contents.app-contents {
   background: var(--eternal-glass-content) !important;
   background-image:
-    radial-gradient(ellipse at 88% 12%, rgba(246, 143, 198, .13), transparent 52%),
-    radial-gradient(ellipse at 7% 85%, rgba(221, 125, 183, .075), transparent 51%) !important;
+    radial-gradient(ellipse at 88% 12%, rgba(143, 70, 117, .10), transparent 52%),
+    radial-gradient(ellipse at 7% 85%, rgba(151, 72, 134, .075), transparent 51%) !important;
 }
 
 .app-contents .app-sidebar {
@@ -150,11 +150,11 @@
  * Use the existing active-state pseudo-element, preserving focus/keyboard flow.
  */
 .app-grid-navbar .nav-button {
-  border-radius: 17px !important;
+  border-radius: 999px !important;
 }
 
 .app-grid-navbar .nav-button::before {
-  border-radius: 17px !important;
+  border-radius: 999px !important;
 }
 
 .app-grid-navbar .nav-button:hover:not(:disabled) {
@@ -173,11 +173,11 @@
 .app-contents [data-library-instance-card] {
   background: linear-gradient(
     150deg,
-    rgba(255, 203, 230, .16),
+    rgba(255, 255, 255, .055),
     var(--eternal-glass-card) 58%
   ) !important;
   border-color: var(--eternal-glass-outline) !important;
-  border-radius: 22px !important;
+  border-radius: 16px !important;
   box-shadow:
     0 10px 22px -13px var(--eternal-glass-shadow),
     inset 0 1px 0 var(--eternal-glass-shine),
@@ -210,8 +210,8 @@
   .app-grid-layout:not(.disable-advanced-rendering) .app-grid-navbar,
   .app-grid-layout:not(.disable-advanced-rendering) .app-title-bar,
   .app-contents:not(.disable-advanced-rendering) .app-sidebar {
-    -webkit-backdrop-filter: blur(16px) saturate(128%);
-    backdrop-filter: blur(16px) saturate(128%);
+    -webkit-backdrop-filter: blur(14px) saturate(115%);
+    backdrop-filter: blur(14px) saturate(115%);
   }
 }
 
@@ -243,9 +243,9 @@
  * Never blur individual library items: large libraries stay lightweight.
  */
 :root {
-  --eternal-glass-white-reflection: rgba(255, 255, 255, .22);
-  --eternal-glass-soft-reflection: rgba(255, 255, 255, .11);
-  --eternal-glass-rose-halo: rgba(255, 155, 210, .24);
+  --eternal-glass-white-reflection: rgba(255, 255, 255, .075);
+  --eternal-glass-soft-reflection: rgba(255, 255, 255, .05);
+  --eternal-glass-rose-halo: rgba(237, 163, 189, .14);
 }
 
 :root.light-mode,
@@ -322,7 +322,7 @@
 
 /* Recent "Continue" cards share the lightweight, glossy library-card finish. */
 .app-contents .clickable-card {
-  border-radius: 22px !important;
+  border-radius: 16px !important;
   background:
     linear-gradient(150deg, var(--eternal-glass-white-reflection), transparent 54%),
     var(--eternal-glass-card) !important;
@@ -338,7 +338,7 @@
 
 /* Existing welcome, account and form surfaces get slightly softer corners. */
 .app-sidebar .eternal-welcome-card {
-  border-radius: 22px !important;
+  border-radius: 16px !important;
   box-shadow:
     inset 0 1px 0 var(--eternal-glass-white-reflection),
     0 12px 26px -18px var(--eternal-glass-shadow);
@@ -363,5 +363,97 @@
     background: Canvas !important;
     border-color: CanvasText !important;
     box-shadow: none !important;
+  }
+}
+
+
+/* === Adapted from the user's Eternal Glassy HTML mockup ===
+ * Aesthetic only: retain original fonts, content, states, events and geometry.
+ * The separate "browser window" frame in the mockup is intentionally omitted.
+ */
+.app-grid-layout .app-title-bar { border-bottom-color: rgba(255,255,255,.10) !important; }
+.app-grid-layout .app-grid-navbar { border-right-color: rgba(255,255,255,.10) !important; }
+.app-contents .app-sidebar { border-left-color: rgba(255,255,255,.09) !important; }
+
+/* Lightweight instance / continue cards: rounded and dark translucent. */
+.app-contents :is(.clickable-card, [data-library-instance-card]) {
+  background:
+    linear-gradient(165deg, rgba(255,255,255,.035), transparent 66%),
+    var(--eternal-glass-card) !important;
+  border: 1px solid var(--eternal-glass-outline) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 26px -19px var(--eternal-glass-shadow),
+    inset 0 1px 0 rgba(255,255,255,.065);
+}
+.app-contents :is(.clickable-card, [data-library-instance-card]):hover {
+  border-color: var(--eternal-glass-outline-hover) !important;
+}
+/* Pill-shaped text buttons, but keep circular icon buttons and focus rings. */
+.app-contents [data-button]:not([class*="rounded-full"]):not([aria-label]),
+.app-contents .eternal-wallpaper-actions button {
+  border-radius: 999px !important;
+}
+.app-contents [data-button].button-frame--base:not([class*="rounded-full"]):not(:focus-visible) {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06),
+    0 0 0 1px var(--eternal-glass-outline) !important;
+}
+.app-contents [data-library-page-background] input:is([type="search"], [type="text"]),
+.app-contents [data-library-page-background] input:not([type]) {
+  border-radius: 999px !important;
+}
+/* Round the original navigation icons, leave instance thumbnails unchanged. */
+.app-grid-navbar .nav-button,
+.app-grid-navbar .nav-button::before {
+  border-radius: 999px !important;
+}
+.app-grid-navbar .nav-button.router-link-active,
+.app-grid-navbar .nav-button.subpage-active {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15),
+    0 0 0 1px rgba(255,255,255,.10) !important;
+}
+/* Right panel: independent glass modules for existing account and friends UI. */
+.app-sidebar .sidebar-default-content > div.p-4 {
+  margin: 12px 12px 0 !important;
+  padding: 14px !important;
+  border: 1px solid var(--eternal-glass-outline) !important;
+  border-radius: 14px !important;
+  background: rgba(38,22,40,.52) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055);
+}
+.app-sidebar .eternal-welcome { padding: 12px 12px 0 !important; }
+.app-sidebar .eternal-welcome-card {
+  border: 1px solid var(--eternal-glass-outline) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(160deg, rgba(255,255,255,.035), rgba(44,25,46,.68)) !important;
+}
+.app-sidebar .eternal-news-refresh {
+  border-radius: 999px !important;
+  border-color: var(--eternal-glass-outline) !important;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .app-contents:not(.disable-advanced-rendering) .app-sidebar .sidebar-default-content > div.p-4,
+  .app-contents:not(.disable-advanced-rendering) .app-sidebar .eternal-welcome-card {
+    -webkit-backdrop-filter: blur(8px) saturate(110%);
+    backdrop-filter: blur(8px) saturate(110%);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .app-sidebar .sidebar-default-content > div.p-4,
+  .app-sidebar .eternal-welcome-card {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: var(--eternal-glass-card) !important;
+  }
+}
+@media (forced-colors: active) {
+  .app-sidebar .sidebar-default-content > div.p-4,
+  .app-sidebar .eternal-welcome-card,
+  .app-contents [data-library-instance-card],
+  .app-contents .clickable-card {
+    background: Canvas !important;
+    border-color: CanvasText !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
 }
