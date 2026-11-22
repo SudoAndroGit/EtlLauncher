@@ -468,3 +468,258 @@
     backdrop-filter: none !important;
   }
 }
+
+
+/* === Eternal Glassy v3 — closer visual match to the supplied HTML === */
+/* Visual-only refinement for the real Modrinth Vue components. This intentionally
+ * does not alter the instance grid measurements, card interactions, fonts, or
+ * right-sidebar data. Avoid per-instance blurs to keep large libraries fast.
+ */
+:root {
+  --eternal-v3-rail-pane: rgba(38, 22, 40, .82);
+  --eternal-v3-rail-stroke: rgba(255, 255, 255, .105);
+  --eternal-v3-hero-surface: rgba(37, 18, 41, .68);
+  --eternal-v3-search-surface: rgba(20, 8, 26, .54);
+  --eternal-v3-quiet-button: rgba(255, 255, 255, .055);
+  --eternal-v3-quiet-hover: rgba(255, 255, 255, .10);
+  --eternal-v3-rose: #eda3bd;
+  --eternal-v3-rose-hover: #f2b3c9;
+  --eternal-v3-rose-ink: #401428;
+  --eternal-v3-pressed: rgba(237, 163, 189, .28);
+  --eternal-v3-divider: rgba(255, 255, 255, .085);
+}
+:root.light-mode,
+.light-mode,
+:root.light,
+.light {
+  --eternal-v3-rail-pane: rgba(255, 248, 253, .91);
+  --eternal-v3-rail-stroke: rgba(162, 91, 128, .22);
+  --eternal-v3-hero-surface: rgba(255, 246, 252, .88);
+  --eternal-v3-search-surface: rgba(255, 252, 254, .80);
+  --eternal-v3-quiet-button: rgba(186, 100, 147, .075);
+  --eternal-v3-quiet-hover: rgba(186, 100, 147, .14);
+  --eternal-v3-rose: #ce679b;
+  --eternal-v3-rose-hover: #dc84ab;
+  --eternal-v3-rose-ink: #301623;
+  --eternal-v3-pressed: rgba(205, 109, 151, .18);
+  --eternal-v3-divider: rgba(162, 91, 128, .13);
+}
+
+/* More of the reference's soft cherry-blossom ambience behind the launcher.
+ * The custom photo remains the first choice via --eternal-custom-wallpaper.
+ */
+.app-grid-layout.app-grid-layout {
+  background-image: var(
+    --eternal-custom-wallpaper,
+    radial-gradient(ellipse at 95% 62%, rgba(205, 110, 166, .22), transparent 38%),
+    radial-gradient(ellipse at 5% 18%, rgba(231, 158, 185, .14), transparent 39%),
+    radial-gradient(ellipse at 58% 2%, rgba(132, 69, 116, .18), transparent 51%),
+    var(--eternal-glass-wallpaper)
+  ) !important;
+}
+.app-contents.app-contents {
+  border-top-left-radius: 18px !important;
+  border-top: 1px solid var(--eternal-glass-outline);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
+}
+.app-contents .app-viewport {
+  background: linear-gradient(155deg, rgba(255, 255, 255, .018), transparent 45%);
+}
+
+/* The HTML reference has a floating inner rail, not an opaque full-width slab.
+ * The decorative layer never receives pointer events or changes icon positions.
+ */
+.app-grid-layout .app-grid-navbar {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+  border-right-color: transparent !important;
+  box-shadow: none !important;
+}
+.app-grid-layout .app-grid-navbar::after {
+  content: '';
+  position: absolute;
+  inset: 12px 6px 12px 6px;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid var(--eternal-v3-rail-stroke);
+  border-radius: 15px;
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, .038), transparent 50%),
+    var(--eternal-v3-rail-pane);
+  box-shadow:
+    inset 0 1px 0 var(--eternal-glass-soft-reflection),
+    0 6px 22px -17px var(--eternal-glass-shadow);
+}
+.app-grid-layout .app-grid-navbar .nav-button:hover:not(:disabled) {
+  background-color: var(--eternal-v3-quiet-hover) !important;
+}
+.app-grid-layout .app-grid-navbar .nav-button.router-link-active {
+  background-color: var(--eternal-v3-pressed) !important;
+  color: var(--color-contrast) !important;
+}
+.app-grid-layout .app-grid-navbar .nav-button.router-link-active::before {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14);
+}
+.app-grid-layout .app-title-bar {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .045), transparent 90%),
+    var(--eternal-glass-titlebar) !important;
+  border-bottom: 1px solid var(--eternal-v3-divider) !important;
+}
+.app-grid-layout .app-title-bar [data-button].button-frame--outlined:not(:focus-visible) {
+  background-color: var(--eternal-v3-quiet-button) !important;
+  box-shadow: inset 0 0 0 1px var(--eternal-glass-outline) !important;
+  border-radius: 999px !important;
+}
+
+/* Pill actions: the real Modrinth ButtonFrame carries data-button.
+ * Keep icon-only controls at their original sizes and preserve focus rings.
+ */
+.app-contents .app-viewport [data-button].button-frame--colored:is(
+  [style*="--color-green"], [style*="--color-brand"]
+) {
+  background-color: var(--eternal-v3-rose) !important;
+  color: var(--eternal-v3-rose-ink) !important;
+  border-radius: 999px !important;
+}
+.app-contents .app-viewport [data-button].button-frame--colored:is(
+  [style*="--color-green"], [style*="--color-brand"]
+):hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--eternal-v3-rose-hover) !important;
+}
+.app-contents .app-viewport [data-button].button-frame--colored:is(
+  [style*="--color-green"], [style*="--color-brand"]
+):not(:focus-visible) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .4),
+    0 0 0 1px rgba(0, 0, 0, .12),
+    0 6px 17px -13px var(--eternal-glass-shadow) !important;
+}
+.app-contents .app-viewport [data-button].button-frame--base {
+  background: var(--eternal-v3-quiet-button) !important;
+  border-radius: 999px !important;
+}
+.app-contents .app-viewport [data-button].button-frame--base:hover:not(:disabled) {
+  background: var(--eternal-v3-quiet-hover) !important;
+}
+
+/* Library toolbar: target the existing input frame and real buttons.
+ * Do not resize instance action buttons inside cards or touch dropdown menus.
+ */
+.app-contents section[data-library-page-background] > div:first-of-type > div:first-of-type > div:first-child:has(input[type="text"]) {
+  min-height: 44px;
+  padding-inline: 17px !important;
+  border-radius: 999px !important;
+  border-color: var(--eternal-glass-outline) !important;
+  background: var(--eternal-v3-search-surface) !important;
+}
+.app-contents section[data-library-page-background] > div:first-of-type > div:first-of-type > div:first-child:has(input[type="text"]):focus-within {
+  border-color: var(--eternal-v3-rose) !important;
+}
+.app-contents section[data-library-page-background] > div:first-of-type > div:first-of-type > [data-button] {
+  min-height: 44px;
+  padding-inline: 17px;
+  border-radius: 999px !important;
+}
+.app-contents section[data-library-page-background] [data-button][aria-haspopup="listbox"] {
+  background: var(--eternal-v3-quiet-button) !important;
+  border-radius: 999px !important;
+}
+.app-contents section[data-library-page-background] [data-button][aria-haspopup="listbox"]:hover:not(:disabled) {
+  background: var(--eternal-v3-quiet-hover) !important;
+}
+
+/* Continue cards match the HTML's restrained plum panels. The cards retain
+ * their existing grid layout, nested play buttons and context menus.
+ */
+.app-contents .clickable-card {
+  background:
+    linear-gradient(150deg, rgba(255,255,255,.027), transparent 75%),
+    var(--eternal-v3-hero-surface) !important;
+  border-radius: 15px !important;
+  border-color: var(--eternal-glass-outline) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 10px 24px -18px var(--eternal-glass-shadow) !important;
+}
+.app-contents .clickable-card:hover {
+  border-color: var(--eternal-glass-outline-hover) !important;
+}
+.app-contents [data-library-instance-card] {
+  border-radius: 14px !important;
+  background:
+    linear-gradient(150deg, rgba(255,255,255,.025), transparent 65%),
+    var(--eternal-glass-card) !important;
+  border-color: var(--eternal-glass-outline) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+.app-contents [data-library-instance-card]:focus-visible {
+  border-color: var(--eternal-v3-rose) !important;
+}
+/* Rounded icon covers like the reference, without changing their pixel art. */
+.app-contents .clickable-card [class*="rounded-[14px]"] {
+  border-radius: 10px !important;
+}
+
+/* Sidebar: aligned cards with calmer separators, matching the reference
+ * while keeping actual account, friends and remote-news components live.
+ */
+.app-contents .app-sidebar .sidebar-default-content > div.p-4 {
+  margin: 12px 12px 0 !important;
+  padding: 14px !important;
+  border-radius: 14px !important;
+  background: var(--eternal-glass-module-bg) !important;
+  border-color: var(--eternal-glass-outline) !important;
+}
+.app-contents .app-sidebar .sidebar-default-content > div.p-4 > h3 {
+  margin-bottom: 10px !important;
+}
+.app-contents .app-sidebar .sidebar-default-content > div.p-4 [data-button].button-frame--base {
+  background: var(--eternal-v3-quiet-button) !important;
+  border-radius: 12px !important;
+}
+.app-contents .app-sidebar .eternal-welcome-card {
+  background: var(--eternal-glass-news-bg) !important;
+  border-color: var(--eternal-glass-outline) !important;
+  border-radius: 14px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 10px 28px -22px var(--eternal-glass-shadow) !important;
+}
+.app-contents .app-sidebar .eternal-news-refresh {
+  background: var(--eternal-v3-quiet-button) !important;
+  border-color: var(--eternal-glass-outline) !important;
+  border-radius: 999px !important;
+}
+
+/* A decorative blur only for the three original shell panels. Per-card blur
+ * is deliberately omitted, including the whole instance library.
+ */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .app-grid-layout:not(.disable-advanced-rendering) .app-grid-navbar::after {
+    -webkit-backdrop-filter: blur(14px) saturate(115%);
+    backdrop-filter: blur(14px) saturate(115%);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .app-grid-layout .app-grid-navbar::after,
+  .app-contents .clickable-card,
+  .app-contents [data-library-instance-card] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background-image: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .app-grid-layout .app-grid-navbar::after,
+  .app-contents .app-viewport,
+  .app-contents .clickable-card,
+  .app-contents [data-library-instance-card] {
+    background: Canvas !important;
+    border-color: CanvasText !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
