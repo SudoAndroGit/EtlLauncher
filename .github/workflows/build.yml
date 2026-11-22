@@ -75,6 +75,11 @@ jobs:
         shell: pwsh
         run: python patches/brand_launcher.py
 
+      - name: Disable optional telemetry and remote error reports
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: python patches/privacy_launcher.py
+
       - name: Setup Node.js
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         uses: actions/setup-node@v4
