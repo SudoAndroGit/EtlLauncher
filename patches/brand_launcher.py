@@ -32,6 +32,20 @@ def main() -> None:
     (PROJECT / "branding/logo.png").write_bytes(icon)
     (FRONTEND / "assets/eternal-logo.png").write_bytes(icon)
 
+    # Ship the supplied Sakura illustration with the app, so the default
+    # wallpaper works offline and does not depend on a remote image server.
+    wallpaper_b64 = (PROJECT / "branding/default-sakura.webp.b64").read_text(encoding="ascii").strip()
+    wallpaper = base64.b64decode(wallpaper_b64, validate=True)
+    if (
+        len(wallpaper) > 1_000_000
+        or not wallpaper.startswith(b"RIFF")
+        or wallpaper[8:12] != b"WEBP"
+    ):
+        raise RuntimeError("Invalid bundled default Sakura WebP image")
+    bundled_wallpaper = UPSTREAM / "apps/app-frontend/public/eternal-default-sakura.webp"
+    bundled_wallpaper.parent.mkdir(parents=True, exist_ok=True)
+    bundled_wallpaper.write_bytes(wallpaper)
+
     theme = (PROJECT / "branding/theme.css").read_text(encoding="utf-8")
     (FRONTEND / "eternal-theme.css").write_text(theme, encoding="utf-8")
     index = UPSTREAM / "apps/app-frontend/index.html"
