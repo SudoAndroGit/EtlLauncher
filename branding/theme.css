@@ -1345,3 +1345,154 @@ section[data-tauri-drag-region-exclude].fixed.top-0.right-0
     backdrop-filter: none !important;
   }
 }
+
+
+/* === Eternal v4.2 — Sakura default, OLED-black menus and foreground particles ===
+ * The main shell and branded actions remain rose in BOTH dark appearances.
+ * Only the browsing workspace, settings and instance creation dialogs switch
+ * surface color. Avoid global --surface-X overrides and preserve original UI.
+ */
+
+/* Sakura is a separate saved theme backed by Modrinth's dark token family.
+ * Preview in Settings needs its own plum tokens even while OLED is active.
+ */
+.preview.sakura-mode {
+  --surface-1: #241627;
+  --surface-2: #2c1b31;
+  --surface-3: #37223b;
+  --surface-4: #51324e;
+  --surface-5: #6e4b65;
+  --color-button-bg: #51334c;
+  --color-base: #d9c2d6;
+  --color-secondary: #aa92a8;
+  --color-contrast: #fff3fb;
+  color: #fff3fb;
+  background: #241627 !important;
+}
+.preview.sakura-mode .example-card {
+  background-color: #39243f !important;
+  border-color: rgba(245, 181, 213, .25) !important;
+}
+
+/* Settings and creation dialogs: Sakura glass or deep OLED black.
+ * Specific themed selectors override legacy CSS from earlier builds.
+ */
+:root.sakura-mode .modal-body {
+  background:
+    linear-gradient(145deg, rgba(255,221,239,.045), transparent 55%),
+    rgba(38, 22, 42, .96) !important;
+  border-color: rgba(245,181,213,.18) !important;
+}
+:root.sakura-mode .modal-body :is(.bg-surface-1, .bg-surface-2, .bg-surface-3, .bg-bg-raised) {
+  background-color: rgba(53, 32, 57, .82) !important;
+}
+:root.sakura-mode .modal-body .eternal-wallpaper-settings {
+  background:
+    linear-gradient(150deg, rgba(255,255,255,.04), transparent 65%),
+    rgba(65, 37, 66, .70) !important;
+}
+:root.sakura-mode .modal-body.eternal-settings-modal {
+  background:
+    linear-gradient(153deg, rgba(255,227,245,.065), transparent 45%),
+    rgba(33, 19, 38, .94) !important;
+}
+
+/* OLED: only panels/menus go black, NOT the pink launcher shell,
+ * selected navigation buttons, titlebar, wallpaper or brand accents.
+ */
+:root.oled-mode .modal-body,
+:root.oled-mode .modal-body.eternal-settings-modal {
+  background: rgba(9, 9, 13, .97) !important;
+  border-color: rgba(225, 193, 210, .13) !important;
+  box-shadow: 0 23px 65px rgba(0,0,0,.43) !important;
+}
+:root.oled-mode .modal-body :is(.bg-surface-1, .bg-surface-2, .bg-surface-3, .bg-bg-raised) {
+  background-color: rgba(17, 17, 22, .94) !important;
+}
+:root.oled-mode .modal-body .eternal-wallpaper-settings {
+  background: rgba(19,19,25,.96) !important;
+  border-color: rgba(220,185,205,.14) !important;
+}
+:root.oled-mode .modal-body .eternal-appearance-selector select,
+:root.oled-mode .modal-body :is(input[type="text"], input[type="search"], textarea) {
+  background-color: rgba(15,15,20,.98) !important;
+}
+:root.oled-mode [role="menu"][id^="button-overflow-"] {
+  background: rgba(11,11,15,.97) !important;
+  border-color: rgba(255,225,242,.14) !important;
+  box-shadow: 0 16px 38px rgba(0,0,0,.48) !important;
+}
+:root.oled-mode [role="menu"][id^="button-overflow-"] .button-menu-arrow::before {
+  background: #0b0b0f !important;
+}
+
+/* Real Modrinth browse page gets .eternal-browse-page via guarded patch.
+ * The ProjectCard uses .project-card-container > .bg-surface-3.
+ */
+:root.sakura-mode .eternal-browse-page .project-card-container > .bg-surface-3 {
+  background:
+    linear-gradient(155deg, rgba(255,255,255,.035), transparent 75%),
+    rgba(47, 27, 51, .86) !important;
+  border-color: rgba(242, 183, 216, .17) !important;
+}
+:root.sakura-mode .eternal-browse-page .project-card-container:hover > .bg-surface-3 {
+  background: rgba(59, 35, 63, .91) !important;
+  border-color: rgba(242, 183, 216, .28) !important;
+}
+:root.oled-mode .eternal-browse-page .project-card-container > .bg-surface-3 {
+  background: rgba(10,10,14,.95) !important;
+  border-color: rgba(255,225,242,.12) !important;
+}
+:root.oled-mode .eternal-browse-page .project-card-container:hover > .bg-surface-3 {
+  background: rgba(22,22,27,.96) !important;
+  border-color: rgba(255,225,242,.21) !important;
+}
+:root.oled-mode .eternal-browse-page :is(.bg-surface-2, .bg-surface-3, .bg-button-bg) {
+  background-color: rgba(13,13,18,.94) !important;
+}
+:root.sakura-mode .eternal-browse-page :is(.bg-surface-2, .bg-surface-3, .bg-button-bg) {
+  background-color: rgba(48,27,51,.82) !important;
+}
+/* Browsing filters live in the shared sidebar, outside the browse root. */
+:root.oled-mode .app-contents:has(.eternal-browse-page) .app-sidebar,
+:root.oled-mode .app-contents:has(.eternal-browse-page) .app-sidebar .sidebar-default-content > div.p-4 {
+  background: rgba(11,11,15,.89) !important;
+}
+:root.sakura-mode .app-contents:has(.eternal-browse-page) .app-sidebar {
+  background: rgba(45,25,48,.46) !important;
+}
+
+/* The particles are now teleported to <body>. Render above content and
+ * below all 1000+ z-index overlays without trapping clicks or scroll.
+ */
+body > .eternal-particles-layer.eternal-particles-fixed {
+  position: fixed !important;
+  inset: var(--top-bar-height, 48px) 300px 0 var(--left-bar-width, 112px) !important;
+  width: auto !important;
+  height: auto !important;
+  display: block;
+  z-index: 95 !important;
+  pointer-events: none !important;
+  border-radius: 18px 0 0 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+:root[data-eternal-particles="none"] body > .eternal-particles-layer.eternal-particles-fixed {
+  display: none !important;
+}
+body > .eternal-particles-layer .eternal-particle {
+  opacity: .78;
+  box-shadow: 0 1px 5px rgba(255,190,220,.27);
+}
+@media (prefers-reduced-motion: reduce) {
+  body > .eternal-particles-layer.eternal-particles-fixed { display: none !important; }
+}
+@media (forced-colors: active) {
+  body > .eternal-particles-layer.eternal-particles-fixed { display: none !important; }
+  :root.oled-mode .modal-body,
+  :root.sakura-mode .modal-body {
+    background: Canvas !important;
+    color: CanvasText !important;
+    border-color: CanvasText !important;
+  }
+}
