@@ -113,6 +113,23 @@ def main() -> None:
 
     settings = FRONTEND / "features/settings/app-settings-modal/index.vue"
     replace_once(settings, "defaultMessage: 'Modrinth App {version}'", "defaultMessage: 'EtlLauncher {version}'")
+    replace_once(
+        settings,
+        "{{ formatMessage(messages.appVersion, { version: appInfo.version }) }}",
+        "EtlLauncher {{ appInfo.version }}",
+    )
+    replace_once(settings, "\tModrinthIcon,\n", "")
+    replace_once(
+        settings,
+        "import { useAppSettings } from '@/composables/use-app-settings.ts'",
+        "import etlLogo from '@/assets/etllauncher-logo.png'\n"
+        "import { useAppSettings } from '@/composables/use-app-settings.ts'",
+    )
+    replace_once(
+        settings,
+        '<ModrinthIcon aria-hidden="true" class="w-6 h-6" />',
+        '<img :src="etlLogo" alt="" class="w-6 h-6 object-contain" />',
+    )
 
     print("Sakura branding applied to the desktop titlebar, splash, settings and CSS.")
     print("Icon conversion for Tauri is handled separately by the workflow.")
