@@ -893,6 +893,12 @@
   .app-contents.app-contents {
     --eternal-glass-content: rgba(29, 16, 33, .90);
   }
+  :root.light-mode .app-contents.app-contents,
+  .light-mode .app-contents.app-contents,
+  :root.light .app-contents.app-contents,
+  .light .app-contents.app-contents {
+    --eternal-glass-content: rgba(255, 248, 252, .94);
+  }
   .app-contents .app-sidebar {
     background: var(--eternal-v3-rail-pane) !important;
     -webkit-backdrop-filter: none !important;
