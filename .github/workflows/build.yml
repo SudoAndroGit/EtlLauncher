@@ -64,6 +64,11 @@ jobs:
         shell: pwsh
         run: python patches/patch_launcher.py
 
+      - name: Apply Sakura branding, logo and pink theme
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: python patches/brand_launcher.py
+
       - name: Setup Node.js
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         uses: actions/setup-node@v4
@@ -87,6 +92,15 @@ jobs:
         working-directory: upstream
         shell: pwsh
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Sakura app icons (including Windows .ico)
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        working-directory: upstream
+        shell: pwsh
+        run: |
+          pnpm --filter @modrinth/app tauri icon "$env:GITHUB_WORKSPACE/branding/logo.png" --output "$env:GITHUB_WORKSPACE/upstream/apps/app/icons"
+          if (!(Test-Path 'apps/app/icons/icon.ico')) { throw 'Icon generation failed: icon.ico missing' }
+          if (!(Test-Path 'apps/app/icons/128x128.png')) { throw 'Icon generation failed: 128x128.png missing' }
 
       - name: Configure official Modrinth build environment
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
