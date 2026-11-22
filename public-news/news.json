@@ -4,14 +4,14 @@
   "items": [
     {
       "id": "bienvenida",
-      "title": "¡ASDWEFWEFWE 🌸",
-      "body": "Nuestra primera versión ya está aquí. Gracias por formar parte de esta aventura. (≧◡≦)",
+      "title": "¡Version 1.1!",
+      "body": "Hemos cambiado la interfaz de modrith por algo mas lindo con un toque de sakura",
       "date": "2026-11-22"
     },
     {
       "id": "sakura-glass",
-      "title": "Sakura Glass",
-      "body": "Personaliza tu launcher con nuestro tema de cristal rosa y una fotografía de fondo propia.",
+      "title": "Temas",
+      "body": "Personaliza tu launcher con nuestro tema de cristal rosa y una fotografía de fondo propia en ajustes!",
       "date": "2026-11-22"
     }
   ]
