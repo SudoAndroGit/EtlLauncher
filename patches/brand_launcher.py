@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply EtlLauncher Sakura branding to the upstream desktop app.
+"""Apply EternalLauncher Sakura branding to the upstream desktop app.
 
 Runs after patches/patch_launcher.py. Fails closed when upstream UI layout changes.
 """
@@ -30,26 +30,26 @@ def main() -> None:
     if not icon.startswith(b"\x89PNG\r\n\x1a\n"):
         raise RuntimeError("branding/logo.png.b64 does not contain a PNG image")
     (PROJECT / "branding/logo.png").write_bytes(icon)
-    (FRONTEND / "assets/etllauncher-logo.png").write_bytes(icon)
+    (FRONTEND / "assets/eternal-logo.png").write_bytes(icon)
 
     theme = (PROJECT / "branding/theme.css").read_text(encoding="utf-8")
-    (FRONTEND / "etllauncher-theme.css").write_text(theme, encoding="utf-8")
+    (FRONTEND / "eternal-theme.css").write_text(theme, encoding="utf-8")
     index = UPSTREAM / "apps/app-frontend/index.html"
     replace_once(
         index,
         "<title>Modrinth App</title>",
-        '<title>EtlLauncher</title>',
+        '<title>Eternal</title>',
     )
     replace_once(
         index,
         '<link rel="icon" type="image/svg+xml" href="/vite.svg" />',
-        '<link rel="icon" type="image/png" href="/src/assets/etllauncher-logo.png" />',
+        '<link rel="icon" type="image/png" href="/src/assets/eternal-logo.png" />',
     )
     replace_once(
         index,
         '<link rel="stylesheet" href="/src/assets/stylesheets/global.scss" />',
         '<link rel="stylesheet" href="/src/assets/stylesheets/global.scss" />'
-        '\n\t\t<link rel="stylesheet" href="/src/etllauncher-theme.css" />',
+        '\n\t\t<link rel="stylesheet" href="/src/eternal-theme.css" />',
     )
 
     title = FRONTEND / "app/shell/title-bar/index.vue"
@@ -57,23 +57,23 @@ def main() -> None:
     replace_once(
         title,
         "import AppActionBar from './action-bar.vue'",
-        "import etlLogo from '@/assets/etllauncher-logo.png'\n\nimport AppActionBar from './action-bar.vue'",
+        "import eternalLogo from '@/assets/eternal-logo.png'\n\nimport AppActionBar from './action-bar.vue'",
     )
     replace_once(
         title,
         '<TextLogo class="h-7 w-auto shrink-0 text-contrast pointer-events-none" />',
-        '<img :src="etlLogo" alt="" class="h-7 w-7 shrink-0 object-contain pointer-events-none" />\n'
+        '<img :src="eternalLogo" alt="" class="h-7 w-7 shrink-0 object-contain pointer-events-none" />\n'
         '\t\t\t<span class="ml-1 text-base font-semibold tracking-wide text-brand pointer-events-none">'
-        'EtlLauncher</span>',
+        'Eternal</span>',
     )
 
     splash = FRONTEND / "components/ui/SplashScreen.vue"
     old = splash.read_text(encoding="utf-8")
     new, count = re.subn(
         r'<svg\s+class="app-logo".*?</svg>',
-        '<div class="etl-splash-brand">'
-        '<img :src="etlLogo" alt="" class="etl-splash-icon" />'
-        '<strong class="etl-splash-name">EtlLauncher</strong>'
+        '<div class="eternal-splash-brand">'
+        '<img :src="eternalLogo" alt="" class="eternal-splash-icon" />'
+        '<strong class="eternal-splash-name">Eternal</strong>'
         '</div>',
         old,
         count=1,
@@ -85,21 +85,21 @@ def main() -> None:
         raise RuntimeError("Cannot locate splash script setup")
     new = new.replace(
         "<script setup>",
-        "<script setup>\nimport etlLogo from '@/assets/etllauncher-logo.png'",
+        "<script setup>\nimport eternalLogo from '@/assets/eternal-logo.png'",
         1,
     )
     css = """
-.etl-splash-brand {
+.eternal-splash-brand {
   display: flex;
   align-items: center;
   gap: 0.8rem;
 }
-.etl-splash-icon {
+.eternal-splash-icon {
   width: 3.2rem;
   height: 3.2rem;
   object-fit: contain;
 }
-.etl-splash-name {
+.eternal-splash-name {
   font-size: 1.7rem;
   letter-spacing: 0.01em;
   color: var(--color-brand);
@@ -112,23 +112,23 @@ def main() -> None:
     splash.write_text(new, encoding="utf-8")
 
     settings = FRONTEND / "features/settings/app-settings-modal/index.vue"
-    replace_once(settings, "defaultMessage: 'Modrinth App {version}'", "defaultMessage: 'EtlLauncher {version}'")
+    replace_once(settings, "defaultMessage: 'Modrinth App {version}'", "defaultMessage: 'Eternal {version}'")
     replace_once(
         settings,
         "{{ formatMessage(messages.appVersion, { version: appInfo.version }) }}",
-        "EtlLauncher {{ appInfo.version }}",
+        "Eternal {{ appInfo.version }}",
     )
     replace_once(settings, "\tModrinthIcon,\n", "")
     replace_once(
         settings,
         "import { useAppSettings } from '@/composables/use-app-settings.ts'",
-        "import etlLogo from '@/assets/etllauncher-logo.png'\n"
+        "import eternalLogo from '@/assets/eternal-logo.png'\n"
         "import { useAppSettings } from '@/composables/use-app-settings.ts'",
     )
     replace_once(
         settings,
         '<ModrinthIcon aria-hidden="true" class="w-6 h-6" />',
-        '<img :src="etlLogo" alt="" class="w-6 h-6 object-contain" />',
+        '<img :src="eternalLogo" alt="" class="w-6 h-6 object-contain" />',
     )
 
     # Hide only the subscription upsell from the account dropdown; keep all
@@ -168,7 +168,7 @@ def main() -> None:
         '    let win = app.get_window("main").unwrap();\n'
         '    #[cfg(target_os = "windows")]\n'
         '    if let Err(err) = win.set_icon(tauri::include_image!("icons/128x128.png")) {\n'
-        '        tracing::warn!("Failed to set EtlLauncher taskbar icon: {err}");\n'
+        '        tracing::warn!("Failed to set EternalLauncher taskbar icon: {err}");\n'
         '    }\n',
     )
 
