@@ -68,7 +68,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version-file: upstream/.nvmrc
 
       - name: Setup pnpm
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
@@ -76,7 +76,6 @@ jobs:
         working-directory: upstream
         run: |
           corepack enable
-          corepack prepare pnpm@12.11.2 --activate
           pnpm --version
 
       - name: Setup Rust
@@ -100,7 +99,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: EtlLauncher-${{ steps.upstream.outputs.tag }}-windows-x64
-          path: upstream/apps/app/src-tauri/target/release/bundle/nsis/*.exe
+          path: upstream/target/release/bundle/nsis/*.exe
           if-no-files-found: error
           retention-days: 30
 
