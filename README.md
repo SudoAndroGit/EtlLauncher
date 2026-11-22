@@ -21,17 +21,19 @@
 
 Edita **`branding/welcome.json`** (texto del encabezado, título, descripción, lista de características y mensaje final). La próxima compilación incorporará los cambios. El componente visual está en `branding/welcome-sidebar.vue`; no necesitas modificar los archivos descargados de Modrinth.
 
-## Configurar Discord Rich Presence
+## Discord Rich Presence — EternalLauncher
 
-Discord determina **el nombre y el icono de la actividad** a partir de una aplicación registrada en su Developer Portal, no del nombre del ejecutable.
+El parche ya incorpora el **Application ID** público `1269391023797436426` para las compilaciones nuevas. También puedes sustituirlo más adelante mediante la variable de GitHub Actions `ETERNAL_DISCORD_CLIENT_ID`, sin editar el parche.
 
-1. Entra a https://discord.com/developers/applications y crea una aplicación **EternalLauncher**.
-2. En sus ajustes de Rich Presence/Art Assets, sube tu logo Sakura con el nombre exacto **`eternal_logo`**. La propagación de nuevos recursos puede tardar.
-3. Copia el **Application ID**, que es un identificador público numérico (**no es un bot token**).
-4. En el repositorio GitHub abre **Settings → Secrets and variables → Actions → Variables → New repository variable**. Crea `ETERNAL_DISCORD_CLIENT_ID` con ese ID.
-5. Ejecuta de nuevo el workflow de compilación y activa Rich Presence en la sección Privacidad del launcher.
+Mensajes personalizados:
 
-**Si la variable no está configurada**, la integración de Discord se mantiene desactivada en vez de mostrar el nombre y logo oficiales de Modrinth. No hace falta crear un bot, usar un token ni abrir puertos.
+- **Sin jugar:** `Ausente (｡-ω-) zzZ` y `Disfrutando de un descansito 🌸`.
+- **Jugando a una instancia:** `Jugando: {nombre de la instancia}` y `¡De aventura! (ง •̀ω•́)ง`.
+- **Logo (tooltip):** `EternalLauncher 🌸`.
+
+Discord muestra el **nombre de aplicación** registrado en el Developer Portal: debe llamarse **EternalLauncher**. En [Discord Developer Portal](https://discord.com/developers/applications), abre tu aplicación y configura en **Rich Presence / Art Assets** el logo Sakura con la clave exacta `eternal_logo`. El recurso puede tardar en aparecer en Discord.
+
+No hace falta un bot, un token ni abrir puertos. La opción Discord Rich Presence sigue siendo configurable desde **Privacidad**, y necesitarás reiniciar el launcher tras cambiarla. Aún falta comprobar el resultado visual en una compilación real.
 
 ## Construir
 
