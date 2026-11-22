@@ -14,8 +14,8 @@
 El tema se aplica automáticamente en cada compilación usando `branding/theme.css`. **No se añadió ningún motor de temas** ni se modificó la estructura de Vue o Rust: los ajustes siguen funcionando como en el launcher original y el parche es fácil de revertir.
 
 - Fondo con degradados rosa/lavanda, sin imágenes externas ni animaciones adicionales.
-- Barra superior, navegación izquierda y panel derecho con efecto de cristal rosa.
-- Tarjetas de instancias con fondo translúcido y bordes más suaves, **sin desenfoque por tarjeta**, para no castigar bibliotecas grandes.
+- Barra superior, navegación izquierda y panel derecho con efecto de cristal rosa, mayor transparencia y reflejos blancos suaves.
+- Tarjetas de instancias y «Continuar» translúcidas, con bordes más redondos; botones principales ligeramente más redondeados, conservando sus tamaños, tipografía y funcionamiento. **Sin desenfoque por tarjeta**, para no castigar bibliotecas grandes.
 - Compatibilidad con modo claro/oscuro, reducción de transparencia y el ajuste de renderizado avanzado (desactiva el blur).
 - Si el desenfoque no está disponible, quedan los colores semitransparentes de respaldo.
 
