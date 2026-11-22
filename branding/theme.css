@@ -1,0 +1,64 @@
+/* EtlLauncher Sakura Edition — isolated to the desktop frontend. 
+ * Dark surfaces are preserved; brand green and its explicit green palette
+ * become pink. Do not recolor warning/error semantic colors.
+ */
+:root,
+.light-mode,
+.light {
+  --color-green-50: #fff4f8 !important;
+  --color-green-100: #ffe1ed !important;
+  --color-green-200: #ffc9de !important;
+  --color-green-300: #f7a8cb !important;
+  --color-green-400: #e887b4 !important;
+  --color-green-500: #ce679b !important;
+  --color-green-600: #b75183 !important;
+  --color-green-700: #963b6b !important;
+  --color-green-800: #782e55 !important;
+  --color-green-900: #5f2546 !important;
+  --color-green-950: #39162c !important;
+  --color-green: #b75183 !important;
+  --color-green-highlight: rgba(231, 137, 181, 0.25) !important;
+  --color-green-bg: rgba(232, 135, 180, 0.12) !important;
+  --color-brand: #b75183 !important;
+  --color-brand-highlight: rgba(231, 137, 181, 0.23) !important;
+  --color-brand-shadow: rgba(207, 103, 153, 0.45) !important;
+  --brand-gradient-bg: linear-gradient(0deg, rgba(245,169,197,.16), rgba(245,169,197,.06)) !important;
+  --brand-gradient-strong-bg: linear-gradient(270deg,rgba(255,221,234,.8),rgba(255,239,246,.75)) !important;
+  --brand-gradient-border: rgba(197, 83, 136, 0.2) !important;
+  --brand-gradient-fade-out-color: linear-gradient(to bottom, transparent, rgba(242,225,233,.95) 80%) !important;
+  --loading-bar-gradient: linear-gradient(90deg, #b75183, #f5a9c5) !important;
+  --splash-tint-top: rgba(245,169,197,.32) !important;
+  --splash-overlay: rgba(252,211,230,.13) !important;
+}
+.dark-mode,
+.dark,
+.oled-mode,
+.retro-mode,
+:root[data-theme='dark'] {
+  --color-green-50: #fff4f8 !important;
+  --color-green-100: #ffe4ef !important;
+  --color-green-200: #ffd2e4 !important;
+  --color-green-300: #ffc1db !important;
+  --color-green-400: #f7b3d1 !important;
+  --color-green-500: #f5a9c5 !important;
+  --color-green-600: #e381ac !important;
+  --color-green-700: #c25d8e !important;
+  --color-green-800: #994473 !important;
+  --color-green-900: #6c2f53 !important;
+  --color-green-950: #3b1a32 !important;
+  --color-green: #f5a9c5 !important;
+  --color-green-highlight: rgba(245,169,197,.25) !important;
+  --color-green-bg: rgba(245,169,197,.13) !important;
+  --color-brand: #f5a9c5 !important;
+  --color-brand-highlight: rgba(245,169,197,.22) !important;
+  --color-brand-shadow: rgba(245,169,197,.45) !important;
+  --color-accent-contrast: #26141d !important;
+  --brand-gradient-bg: linear-gradient(0deg, rgba(90,30,61,.25), rgba(110,43,78,.12)) !important;
+  --brand-gradient-strong-bg: linear-gradient(270deg, #20141e 10%, #2c1c29 100%) !important;
+  --brand-gradient-border: rgba(245,169,197,.13) !important;
+  --brand-gradient-fade-out-color: linear-gradient(to bottom, rgba(34,18,30,0), #241b24 80%) !important;
+  --loading-bar-gradient: linear-gradient(90deg, #e381ac, #ffc1db) !important;
+  --splash-tint-top: rgba(245,169,197,.18) !important;
+  --splash-tint-bottom: rgba(75,36,64,.4) !important;
+  --splash-overlay: rgba(32,14,26,.45) !important;
+}
