@@ -190,6 +190,7 @@ export async function setEternalWallpaper(file: File): Promise<void> {
 			throw new Error('No hay espacio local para guardar la imagen.')
 		}
 		try { localStorage.removeItem(GIF_KEY) } catch { /* JPEG already saved */ }
+		void deleteStoredGif()
 		releaseGifUrl()
 		applyEternalWallpaper()
 	} finally {
