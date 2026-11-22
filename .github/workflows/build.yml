@@ -106,7 +106,7 @@ jobs:
             'MODRINTH_URL'
           )
           foreach ($key in $required) {
-            if (!(Select-String -Path $destination -Pattern "^$key\\s*=" -Quiet)) {
+            if (!(Select-String -Path $destination -Pattern "^$key\s*=" -Quiet)) {
               throw "Production environment template does not define $key"
             }
           }
