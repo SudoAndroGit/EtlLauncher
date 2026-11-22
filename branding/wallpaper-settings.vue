@@ -3,15 +3,18 @@ import { ref } from 'vue'
 
 import {
 	getEternalWallpaperEffects,
+	getEternalSidebarTransparency,
 	hasEternalWallpaper,
 	resetEternalWallpaper,
 	setEternalWallpaper,
 	setEternalWallpaperEffects,
+	setEternalSidebarTransparency,
 } from './eternal-wallpaper'
 
 const initialEffects = getEternalWallpaperEffects()
 const darkness = ref(initialEffects.darkness)
-const fade = ref(initialEffects.fade)
+const blur = ref(initialEffects.blur)
+const sidebarTransparency = ref(getEternalSidebarTransparency())
 const input = ref<HTMLInputElement | null>(null)
 const custom = ref(hasEternalWallpaper())
 const busy = ref(false)
@@ -38,7 +41,11 @@ async function selectImage(event: Event) {
 }
 
 function updateEffects() {
-	setEternalWallpaperEffects(darkness.value, fade.value)
+	setEternalWallpaperEffects(darkness.value, blur.value)
+}
+
+function updateSidebarTransparency() {
+	setEternalSidebarTransparency(sidebarTransparency.value)
 }
 
 function restoreDefault() {
@@ -96,24 +103,46 @@ function restoreDefault() {
 			</div>
 			<div class="eternal-wallpaper-effect">
 				<div class="eternal-wallpaper-effect-heading">
-					<label for="eternal-wallpaper-fade">Desvanecimiento</label>
-					<output for="eternal-wallpaper-fade">{{ fade }}%</output>
+					<label for="eternal-wallpaper-blur">Desenfoque</label>
+					<output for="eternal-wallpaper-blur">{{ blur }} px</output>
 				</div>
 				<input
-					id="eternal-wallpaper-fade"
-					v-model.number="fade"
+					id="eternal-wallpaper-blur"
+					v-model.number="blur"
 					type="range"
 					min="0"
-					max="100"
+					max="24"
 					step="1"
 					@input="updateEffects"
 				/>
 			</div>
-			<p class="eternal-wallpaper-hint">El oscurecimiento añade una capa oscura; el desvanecimiento atenúa la imagen sin modificar el archivo original.</p>
+			<p class="eternal-wallpaper-hint">El oscurecimiento añade una capa oscura. El desenfoque suaviza únicamente el fondo, no los botones ni los textos.</p>
 		</div>
 		<p class="eternal-wallpaper-hint">Admite JPG, PNG o WebP (máx. 32 MB). Se reduce y guarda localmente; no se sube a Internet.</p>
 		<p v-if="error" class="eternal-wallpaper-error" role="alert">{{ error }}</p>
 		<p v-else-if="notice" class="eternal-wallpaper-success" role="status">{{ notice }}</p>
+	</section>
+	<section class="eternal-wallpaper-settings">
+		<h3>Panel derecho</h3>
+		<p>Ajusta la transparencia de la zona de cuenta, amigos y noticias. Con 100 % el fondo de los paneles y su desenfoque desaparecen, pero los textos siguen visibles.</p>
+		<div class="eternal-wallpaper-effects">
+			<div class="eternal-wallpaper-effect">
+				<div class="eternal-wallpaper-effect-heading">
+					<label for="eternal-sidebar-transparency">Transparencia del panel derecho</label>
+					<output for="eternal-sidebar-transparency">{{ sidebarTransparency }}%</output>
+				</div>
+				<input
+					id="eternal-sidebar-transparency"
+					v-model.number="sidebarTransparency"
+					type="range"
+					min="0"
+					max="100"
+					step="1"
+					@input="updateSidebarTransparency"
+				/>
+			</div>
+			<p class="eternal-wallpaper-hint">0 % conserva el cristal actual. 100 % muestra el fondo sin oscurecimiento adicional del panel derecho.</p>
+		</div>
 	</section>
 </template>
 
