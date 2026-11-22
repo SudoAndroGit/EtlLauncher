@@ -31,12 +31,12 @@ Las fotografías (no GIF) se **reducen localmente** a un máximo de 1920×1080 y
 
 Tanto los archivos locales como las imágenes obtenidas de `appearance.json` deben pasar la **misma validación**. Límite de **22 MiB** en todos los formatos; extensiones permitidas `.png`, `.jpg`, `.jpeg`, `.webp` y `.gif`. Se comprueba la firma real (bytes del archivo), que coincida con la extensión y con el MIME declarado cuando esté disponible. Los archivos también deben superar la decodificación del WebView.
 
-- **PNG/JPG/WebP estáticos**: hasta 4096 píxeles por lado **y** hasta 16 millones de píxeles en total. WebP animado se rechaza; para animaciones se admite GIF con los límites siguientes.
+- **PNG/JPG/WebP estáticos**: hasta 4096 píxeles por lado **y** hasta 16 millones de píxeles en total. WebP animado y PNG animado (APNG) se rechazan para impedir que eludan los límites de fotogramas; para animaciones se admite GIF con los límites siguientes.
 - **GIF**: hasta 1920 × 1080, como máximo 150 fotogramas y un máximo acumulado de 100 millones de píxeles de fotogramas. Se valida su estructura, paletas y bloques antes de pedir al navegador que lo abra. La animación se conserva intacta.
 - **Fondos remotos**: solo HTTPS y el mismo origen que el archivo `appearance.json`, sin redirecciones. Se valida el flujo de descarga mientras llega (límite real de 22 MiB aunque falte `Content-Length`), formato, dimensiones y decodificación **antes** de aplicar el fondo. Si falla, se muestra Sakura integrado.
 - **Seguridad**: estos controles mitigan archivos malformados y problemas de recursos, pero no sustituyen las actualizaciones del motor de imágenes/WebView2, ni garantizan ausencia total de vulnerabilidades.
 
-Las 13 pruebas automáticas de firmas, límites y GIF están en `tests/image-validation.test.mjs`. El workflow las ejecuta con Node 24 **antes** de instalar dependencias y compilar. Una prueba fallida detiene el build; nunca garantiza por sí sola que la interfaz final funcione en Windows.
+Las 14 pruebas automáticas de firmas, límites y GIF están en `tests/image-validation.test.mjs`. El workflow las ejecuta con Node 24 **antes** de instalar dependencias y compilar. Una prueba fallida detiene el build; nunca garantiza por sí sola que la interfaz final funcione en Windows.
 
 En **Ajustes → Apariencia → Fondo de Eternal**, dos deslizadores se aplican en tiempo real al fondo predeterminado o al personalizado: **Oscurecimiento** (capa oscura, 0–100 %) y **Desenfoque** (0–24 px, solo sobre la imagen). Reemplazamos el antiguo desvanecimiento por desenfoque. Se conserva el oscurecimiento de instalaciones anteriores; los nuevos ajustes se guardan localmente y persisten al reiniciar.
 
