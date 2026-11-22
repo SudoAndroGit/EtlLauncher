@@ -8,6 +8,12 @@ on:
       - 'patches/**'
       - 'branding/**'
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: 'Publish a private GitHub Release after the build succeeds'
+        type: boolean
+        required: false
+        default: false
   schedule:
     - cron: '17 */6 * * *'
 
@@ -21,6 +27,8 @@ concurrency:
 jobs:
   build:
     runs-on: windows-latest
+    outputs:
+      upstream_tag: ${{ steps.upstream.outputs.tag }}
     timeout-minutes: 120
     steps:
       - name: Checkout EtlLauncher patch repository
@@ -166,3 +174,62 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force .build-marker | Out-Null
           Set-Content .build-marker/completed.txt "${{ steps.upstream.outputs.tag }}"
+
+  release:
+    name: Publish private downloadable release
+    needs: build
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release == true }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download installer built by this run
+        uses: actions/download-artifact@v4
+        with:
+          name: EtlLauncher-${{ needs.build.outputs.upstream_tag }}-windows-x64
+          path: release-assets
+
+      - name: Validate installer and create SHA-256 checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release-assets
+          shopt -s nullglob
+          installers=( *.exe )
+          if (( ${#installers[@]} != 1 )); then
+            echo "Expected exactly one Windows installer, found ${#installers[@]}"
+            exit 1
+          fi
+          sha256sum -- "${installers[0]}" > SHA256SUMS.txt
+          echo "Prepared installer and checksum:"
+          cat SHA256SUMS.txt
+
+      - name: Publish private GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_TAG: ${{ needs.build.outputs.upstream_tag }}
+          BUILD_NUMBER: ${{ github.run_number }}
+          BUILD_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          release_tag="etl-${UPSTREAM_TAG}-build.${BUILD_NUMBER}.${BUILD_ATTEMPT}"
+          title="EtlLauncher Sakura Edition ${UPSTREAM_TAG} (build ${BUILD_NUMBER}.${BUILD_ATTEMPT})"
+          cat > release-notes.md <<EOF
+          EtlLauncher Sakura Edition — private experimental Windows x64 build.
+
+          Upstream Modrinth App: ${UPSTREAM_TAG}
+          EtlLauncher patch commit: ${GITHUB_SHA}
+
+          Includes a Windows NSIS installer and SHA256SUMS.txt for verification.
+
+          This is an unofficial, unsigned, customized build. Back up your Minecraft
+          instances before installing. Windows SmartScreen may show a warning.
+          EOF
+          gh release create "${release_tag}" release-assets/*.exe release-assets/SHA256SUMS.txt \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "${title}" \
+            --notes-file release-notes.md \
+            --prerelease
+          echo "Published private release ${release_tag}"
