@@ -88,6 +88,30 @@ jobs:
         shell: pwsh
         run: pnpm install --frozen-lockfile
 
+      - name: Configure official Modrinth build environment
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $source = 'upstream/packages/app-lib/.env.prod'
+          $destination = 'upstream/packages/app-lib/.env'
+          if (!(Test-Path $source)) { throw "Missing upstream production environment template: $source" }
+          Copy-Item -LiteralPath $source -Destination $destination -Force
+          $required = @(
+            'MODRINTH_API_URL',
+            'MODRINTH_API_URL_V3',
+            'MODRINTH_API_BASE_URL',
+            'SHARED_INSTANCES_API_BASE_URL',
+            'MODRINTH_LAUNCHER_META_URL',
+            'MODRINTH_SOCKET_URL',
+            'MODRINTH_URL'
+          )
+          foreach ($key in $required) {
+            if (!(Select-String -Path $destination -Pattern "^$key\\s*=" -Quiet)) {
+              throw "Production environment template does not define $key"
+            }
+          }
+          Write-Host 'Official production environment file prepared; required keys found.'
+
       - name: Build Tauri NSIS installer
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         working-directory: upstream
