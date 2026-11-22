@@ -115,7 +115,10 @@
 
 /* The base frame is a simple static gradient: no image requests or animations. */
 .app-grid-layout.app-grid-layout {
-  background: var(--eternal-glass-wallpaper) !important;
+  background: var(--eternal-custom-wallpaper, var(--eternal-glass-wallpaper)) !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
 }
 
 .app-grid-layout .app-grid-navbar {
