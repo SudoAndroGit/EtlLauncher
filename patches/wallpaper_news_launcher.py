@@ -60,6 +60,35 @@ def install_wallpaper() -> None:
 )""",
     )
 
+    # A previous install may already have stored Modrinth's ordinary Dark theme.
+    # Map that choice to OLED and use OLED as the preferred system-dark theme.
+    theme = FRONTEND / "composables/use-theme.ts"
+    replace_once(
+        theme,
+        "return stored as ColorTheme",
+        "return stored === 'dark' ? 'oled' : (stored as ColorTheme)",
+    )
+    replace_once(
+        theme,
+        "\treturn 'dark'\n}\n\nfunction loadPreferredDarkTheme()",
+        "\treturn 'oled'\n}\n\nfunction loadPreferredDarkTheme()",
+    )
+    replace_once(
+        theme,
+        "\t\t\treturn stored\n\t\t}\n\t} catch {\n\t\t// storage blocked or full\n\t}\n\n\treturn 'dark'\n}",
+        "\t\t\treturn stored === 'dark' ? 'oled' : stored\n\t\t}\n\t} catch {\n\t\t// storage blocked or full\n\t}\n\n\treturn 'oled'\n}",
+    )
+    replace_once(
+        theme,
+        "\t\tpreferredDark.value = appearance.theme",
+        "\t\tpreferredDark.value = appearance.theme === 'dark' ? 'oled' : appearance.theme",
+    )
+    replace_once(
+        theme,
+        "\t\tpreferred.value = appearance.theme as ColorTheme",
+        "\t\tpreferred.value = appearance.theme === 'dark' ? 'oled' : appearance.theme as ColorTheme",
+    )
+
     # Name only the settings modal, so the Eternal Glass CSS does not touch
     # unrelated installer confirmations, warning dialogs or other popups.
     modal = FRONTEND / "features/settings/app-settings-modal/index.vue"
