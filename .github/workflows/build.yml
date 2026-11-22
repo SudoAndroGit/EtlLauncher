@@ -36,7 +36,7 @@ jobs:
       upstream_tag: ${{ steps.upstream.outputs.tag }}
     timeout-minutes: 120
     steps:
-      - name: Checkout EtlLauncher patch repository
+      - name: Checkout EternalLauncher patch repository
         uses: actions/checkout@v4
 
       - name: Discover latest upstream application version
