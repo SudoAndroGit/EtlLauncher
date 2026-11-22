@@ -148,7 +148,7 @@ function restoreDefault() {
 			</div>
 			<p class="eternal-wallpaper-hint">El oscurecimiento añade una capa oscura. El desenfoque suaviza únicamente el fondo, no los botones ni los textos.</p>
 		</div>
-		<p class="eternal-wallpaper-hint">Admite JPG, PNG, WebP y GIF (máx. 32 MB). Los GIF conservan su animación y se guardan localmente; no se suben a Internet.</p>
+		<p class="eternal-wallpaper-hint">Admite PNG, JPG, WebP y GIF (máx. 22 MB). Se verifica el formato real y la resolución. Las imágenes fijas admiten hasta 4096 px por lado y 16 MP; los GIF, hasta 1920 × 1080, 150 fotogramas y 100 MP acumulados. Se guardan localmente, nunca se suben a Internet.</p>
 		<p v-if="error" class="eternal-wallpaper-error" role="alert">{{ error }}</p>
 		<p v-else-if="notice" class="eternal-wallpaper-success" role="status">{{ notice }}</p>
 	</section>
