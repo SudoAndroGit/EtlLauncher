@@ -3,8 +3,11 @@
  * saved as JPEG in localStorage: no file-system permissions or network upload.
  */
 const KEY = 'eternal.wallpaper.v1'
-const MAX_SOURCE_BYTES = 12 * 1024 * 1024
+const MAX_SOURCE_BYTES = 32 * 1024 * 1024
 const MAX_STORED_CHARS = 3_000_000
+const EFFECTS_KEY = 'eternal.wallpaper.effects.v1'
+const DEFAULT_DARKNESS = 38
+const DEFAULT_FADE = 12
 const VALID_DATA_URL = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
@@ -26,11 +29,53 @@ export function applyEternalWallpaper(): void {
 	if (image) {
 		document.documentElement.style.setProperty(
 			'--eternal-custom-wallpaper',
-			'linear-gradient(rgba(18, 12, 24, .36), rgba(18, 12, 24, .36)), url("' + image + '")',
+			'url("' + image + '")',
 		)
 	} else {
 		document.documentElement.style.removeProperty('--eternal-custom-wallpaper')
 	}
+	applyEternalWallpaperEffects()
+}
+
+function clampPercent(value: unknown, fallback: number): number {
+	if (typeof value !== 'number' || !Number.isFinite(value)) return fallback
+	return Math.round(Math.min(100, Math.max(0, value)))
+}
+
+export function getEternalWallpaperEffects(): { darkness: number; fade: number } {
+	try {
+		const stored: unknown = JSON.parse(localStorage.getItem(EFFECTS_KEY) ?? 'null')
+		if (stored && typeof stored === 'object') {
+			const values = stored as Record<string, unknown>
+			return {
+				darkness: clampPercent(values.darkness, DEFAULT_DARKNESS),
+				fade: clampPercent(values.fade, DEFAULT_FADE),
+			}
+		}
+	} catch {
+		// Settings may be disabled or corrupted; use safe defaults.
+	}
+	return { darkness: DEFAULT_DARKNESS, fade: DEFAULT_FADE }
+}
+
+export function applyEternalWallpaperEffects(): void {
+	const { darkness, fade } = getEternalWallpaperEffects()
+	document.documentElement.style.setProperty('--eternal-wallpaper-darkness', (darkness / 100).toFixed(2))
+	document.documentElement.style.setProperty('--eternal-wallpaper-image-opacity', ((100 - fade) / 100).toFixed(2))
+}
+
+export function setEternalWallpaperEffects(darkness: number, fade: number): void {
+	const settings = {
+		darkness: clampPercent(darkness, DEFAULT_DARKNESS),
+		fade: clampPercent(fade, DEFAULT_FADE),
+	}
+	try {
+		localStorage.setItem(EFFECTS_KEY, JSON.stringify(settings))
+	} catch {
+		// Storage is optional; the user can still preview the effect.
+	}
+	document.documentElement.style.setProperty('--eternal-wallpaper-darkness', (settings.darkness / 100).toFixed(2))
+	document.documentElement.style.setProperty('--eternal-wallpaper-image-opacity', ((100 - settings.fade) / 100).toFixed(2))
 }
 
 export async function setEternalWallpaper(file: File): Promise<void> {
@@ -38,7 +83,7 @@ export async function setEternalWallpaper(file: File): Promise<void> {
 		throw new Error('Selecciona una imagen JPG, PNG o WebP.')
 	}
 	if (file.size > MAX_SOURCE_BYTES) {
-		throw new Error('La imagen debe ocupar menos de 12 MB.')
+		throw new Error('La imagen debe ocupar como máximo 32 MB.')
 	}
 	const objectUrl = URL.createObjectURL(file)
 	const image = new Image()
