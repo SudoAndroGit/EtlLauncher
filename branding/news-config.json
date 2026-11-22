@@ -1,4 +1,4 @@
 {
-  "url": "",
-  "refreshMinutes": 15
+  "url": "https://new.etlservers.moe/news.json",
+  "refreshMinutes": 30
 }
