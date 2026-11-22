@@ -174,29 +174,3 @@ export async function initializeEternalAppearance(): Promise<void> {
   finally { clearTimeout(timeout) }
 }
 
-export function mountEternalParticles(): void {
-  const mount = () => {
-    const surface = document.querySelector<HTMLElement>('.app-contents .app-viewport')
-    if (!surface) return false
-    if (surface.querySelector('.eternal-particles-layer')) return true
-    const layer = document.createElement('div')
-    layer.className = 'eternal-particles-layer'
-    layer.setAttribute('aria-hidden', 'true')
-    for (let i = 0; i < 14; i++) {
-      const petal = document.createElement('span')
-      petal.className = 'eternal-particle'
-      petal.style.setProperty('--particle-left', `${(i * 43 + 13) % 100}%`)
-      petal.style.setProperty('--particle-delay', `${-((i * 3) % 19)}s`)
-      petal.style.setProperty('--particle-duration', `${17 + ((i * 7) % 10)}s`)
-      petal.style.setProperty('--particle-drift', `${(i % 2 ? -1 : 1) * (25 + (i * 11) % 55)}px`)
-      petal.style.setProperty('--particle-size', `${6 + (i * 7) % 8}px`)
-      layer.appendChild(petal)
-    }
-    surface.appendChild(layer)
-    return true
-  }
-  if (mount()) return
-  const observer = new MutationObserver(() => { if (mount()) observer.disconnect() })
-  observer.observe(document.body, { subtree: true, childList: true })
-  window.setTimeout(() => observer.disconnect(), 12000)
-}
