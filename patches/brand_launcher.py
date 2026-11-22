@@ -27,7 +27,7 @@ def main() -> None:
     # text asset in Git; decode it to a regular PNG before Vite and Tauri run.
     logo_b64 = (PROJECT / "branding/logo.png.b64").read_text(encoding="ascii").strip()
     icon = base64.b64decode(logo_b64, validate=True)
-    if not icon.startswith(b"\\x89PNG\\r\\n\\x1a\\n"):
+    if not icon.startswith(b"\x89PNG\r\n\x1a\n"):
         raise RuntimeError("branding/logo.png.b64 does not contain a PNG image")
     (PROJECT / "branding/logo.png").write_bytes(icon)
     (FRONTEND / "assets/etllauncher-logo.png").write_bytes(icon)
@@ -38,7 +38,7 @@ def main() -> None:
     replace_once(
         index,
         "<title>Modrinth App</title>",
-        '<title>EtlLauncher</title>\\n\\t\\t<link rel="stylesheet" href="/src/etllauncher-theme.css" />',
+        '<title>EtlLauncher</title>\n\t\t<link rel="stylesheet" href="/src/etllauncher-theme.css" />',
     )
 
     title = FRONTEND / "app/shell/title-bar/index.vue"
@@ -46,12 +46,12 @@ def main() -> None:
     replace_once(
         title,
         "import AppActionBar from './action-bar.vue'",
-        "import etlLogo from '@/assets/etllauncher-logo.png'\\n\\nimport AppActionBar from './action-bar.vue'",
+        "import etlLogo from '@/assets/etllauncher-logo.png'\n\nimport AppActionBar from './action-bar.vue'",
     )
     replace_once(
         title,
         '<TextLogo class="h-7 w-auto shrink-0 text-contrast pointer-events-none" />',
-        '<img :src="etlLogo" alt="" class="h-7 w-7 shrink-0 object-contain pointer-events-none" />\\n'
+        '<img :src="etlLogo" alt="" class="h-7 w-7 shrink-0 object-contain pointer-events-none" />\n'
         '\t\t\t<span class="ml-1 text-base font-semibold tracking-wide text-brand pointer-events-none">'
         'EtlLauncher</span>',
     )
@@ -59,7 +59,7 @@ def main() -> None:
     splash = FRONTEND / "components/ui/SplashScreen.vue"
     old = splash.read_text(encoding="utf-8")
     new, count = re.subn(
-        r'<svg\\s+class="app-logo".*?</svg>',
+        r'<svg\s+class="app-logo".*?</svg>',
         '<div class="etl-splash-brand">'
         '<img :src="etlLogo" alt="" class="etl-splash-icon" />'
         '<strong class="etl-splash-name">EtlLauncher</strong>'
@@ -74,7 +74,7 @@ def main() -> None:
         raise RuntimeError("Cannot locate splash script setup")
     new = new.replace(
         "<script setup>",
-        "<script setup>\\nimport etlLogo from '@/assets/etllauncher-logo.png'",
+        "<script setup>\nimport etlLogo from '@/assets/etllauncher-logo.png'",
         1,
     )
     css = """
@@ -97,7 +97,7 @@ def main() -> None:
 """
     if "<style scoped lang=\"scss\">" not in new:
         raise RuntimeError("Cannot locate splash scoped stylesheet")
-    new = new.replace("<style scoped lang=\"scss\">", "<style scoped lang=\"scss\">\\n" + css, 1)
+    new = new.replace("<style scoped lang=\"scss\">", "<style scoped lang=\"scss\">\n" + css, 1)
     splash.write_text(new, encoding="utf-8")
 
     settings = FRONTEND / "features/settings/app-settings-modal/index.vue"
