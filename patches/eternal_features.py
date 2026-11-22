@@ -52,6 +52,29 @@ def remove_hosting_navigation() -> None:
         source[: matches[0].start()] + source[matches[0].end() :],
         encoding="utf-8",
     )
+    # Avoid automatically querying paid Hosting data just after login.
+    replace_once(
+        app,
+        "import { prefetchHostingData } from '@/features/hosting/prefetch'\n",
+        "",
+    )
+    replace_once(
+        app,
+        "watch(\n"
+        "\t() => stateInitialized.value && credentials.value?.session,\n"
+        "\t(session) => {\n"
+        "\t\tif (!session) return\n"
+        "\n"
+        "\t\tvoid prefetchHostingData(\n"
+        "\t\t\tqueryClient,\n"
+        "\t\t\ttauriApiClient,\n"
+        "\t\t\ticonCache,\n"
+        "\t\t\t() => credentials.value?.session === session,\n"
+        "\t\t)\n"
+        "\t},\n"
+        ")\n\n",
+        "",
+    )
 
 
 def install_welcome_panel() -> None:
