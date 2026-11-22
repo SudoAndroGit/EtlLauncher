@@ -88,6 +88,17 @@ test('reject a GIF with more than 150 frames', async () => {
     /150 fotogramas/,
   )
 })
+test('budget a full GIF canvas per frame, including tiny incremental updates', async () => {
+  const bytes = Buffer.concat([
+    gifHeader(1920, 1080),
+    ...Array(49).fill(gifFrame),
+    Buffer.from([0x3b]),
+  ])
+  await assert.rejects(
+    inspectEternalImage(new Blob([bytes], { type: 'image/gif' }), 'memory-heavy.gif'),
+    /100 millones/,
+  )
+})
 test('reject oversized GIF dimensions before decoding', async () => {
   const bytes = Buffer.concat([gifHeader(1921, 1080), gifFrame, Buffer.from([0x3b])])
   await assert.rejects(inspectEternalImage(new Blob([bytes], { type: 'image/gif' }), 'huge.gif'), /1920/)
