@@ -134,7 +134,6 @@ onUnmounted(() => {
 		<div class="eternal-welcome-card">
 			<template v-if="articles.length">
 				<div class="eternal-welcome-eyebrow">
-					<span aria-hidden="true">🌸</span>
 					Noticias de Eternal
 				</div>
 				<div v-for="article in articles" :key="article.id" class="eternal-news-article">
@@ -148,7 +147,6 @@ onUnmounted(() => {
 			</template>
 			<template v-else>
 				<div class="eternal-welcome-eyebrow">
-					<span aria-hidden="true">🌸</span>
 					{{ welcome.eyebrow }}
 				</div>
 				<h3 class="eternal-welcome-title">{{ welcome.title }}</h3>
