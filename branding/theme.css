@@ -1210,3 +1210,138 @@
     backdrop-filter: none !important;
   }
 }
+
+
+/* === Eternal Glass v4.1 — broader rail, themed overlay controls and reliable particles ===
+ * The button menu and window controls are teleported outside the normal
+ * .app-grid-layout subtree. Their original #141416 surfaces were unaffected
+ * by the shell's Sakura palette; these selectors target those real elements.
+ */
+
+/* Keep the shell's effective navigation column and its panel geometry in sync.
+ * Width = 112px, left inset = 16px, panel = 88px; 48px buttons fit between
+ * the 19px inner paddings without clipping their circular active backgrounds.
+ */
+.app-grid-layout.app-grid-layout,
+.app-contents.app-contents {
+  --left-bar-width: 7rem !important;
+}
+.app-grid-layout .app-grid-navbar {
+  width: 88px !important;
+  min-width: 88px !important;
+  max-width: 88px !important;
+  margin: 8px 8px 8px 16px !important;
+  padding: 13px 19px !important;
+  box-sizing: border-box !important;
+  border-radius: 20px !important;
+  align-items: center !important;
+  overflow: visible !important;
+  gap: 7px !important;
+}
+.app-grid-layout .app-grid-navbar > .nav-button,
+.app-grid-layout .app-grid-navbar > [data-button],
+.app-grid-layout .app-grid-navbar > button,
+.app-grid-layout .app-grid-navbar > a {
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  align-self: center !important;
+  flex-shrink: 0;
+}
+.app-grid-layout .app-grid-navbar .nav-button::before {
+  border-radius: 50% !important;
+}
+.app-grid-layout .app-grid-navbar [data-button]:has(> .avatar.circle) {
+  padding: 7px !important;
+  overflow: hidden;
+  border-radius: 999px !important;
+}
+
+/* Tauri's custom WindowControls are teleported directly to body.
+ * The titlebar itself already uses --eternal-glass-titlebar.
+ */
+section[data-tauri-drag-region-exclude].fixed.top-0.right-0 {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), transparent 95%),
+    var(--eternal-glass-titlebar) !important;
+  border: 0;
+  border-left: 1px solid var(--eternal-glass-outline);
+  border-bottom: 1px solid var(--eternal-glass-outline);
+  border-bottom-left-radius: 17px !important;
+  box-shadow: -6px 5px 20px -16px var(--eternal-glass-shadow) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(115%);
+  backdrop-filter: blur(12px) saturate(115%);
+}
+section[data-tauri-drag-region-exclude].fixed.top-0.right-0
+  [data-button]:not(.close-button):hover {
+  background-color: var(--eternal-glass-nav-hover) !important;
+}
+
+/* Modrinth's teleport-based profile and account menus: retains all keyboard
+ * navigation, submenu events, item text and danger colors.
+ */
+[role="menu"][id^="button-overflow-"] {
+  background:
+    linear-gradient(155deg, rgba(255,255,255,.05), transparent 68%),
+    rgba(43, 26, 47, .95) !important;
+  color: var(--color-contrast) !important;
+  border: 1px solid var(--eternal-glass-outline) !important;
+  border-radius: 17px !important;
+  box-shadow: 0 16px 38px rgba(13,5,17,.31),
+              inset 0 1px 0 rgba(255,255,255,.09) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(110%);
+  backdrop-filter: blur(14px) saturate(110%);
+}
+[role="menu"][id^="button-overflow-"] .button-menu-arrow::before {
+  background: rgba(43, 26, 47, .96) !important;
+  border-color: var(--eternal-glass-outline) !important;
+}
+[role="menu"][id^="button-overflow-"] [role="menuitem"]:hover,
+[role="menu"][id^="button-overflow-"] [role="menuitem"]:focus-visible {
+  background: rgba(232, 149, 188, .16) !important;
+  border-radius: 11px;
+}
+:root.light-mode [role="menu"][id^="button-overflow-"],
+:root.light [role="menu"][id^="button-overflow-"] {
+  background: rgba(255, 247, 252, .96) !important;
+  box-shadow: 0 14px 35px rgba(86,39,67,.18),
+              inset 0 1px 0 rgba(255,255,255,.75) !important;
+}
+:root.light-mode [role="menu"][id^="button-overflow-"] .button-menu-arrow::before,
+:root.light [role="menu"][id^="button-overflow-"] .button-menu-arrow::before {
+  background: rgba(255,247,252,.97) !important;
+}
+
+/* Vue now creates its particle layer with the application viewport rather
+ * than racing the async root initialization. v-show on the component handles
+ * route changes; data-eternal-particles handles style and disabled state.
+ */
+.app-contents .app-viewport > .eternal-particles-layer {
+  display: block;
+  z-index: 6;
+}
+:root[data-eternal-particles="none"] .app-contents .eternal-particles-layer {
+  display: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-contents .app-viewport > .eternal-particles-layer {
+    display: none !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  section[data-tauri-drag-region-exclude].fixed.top-0.right-0,
+  [role="menu"][id^="button-overflow-"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+@media (forced-colors: active) {
+  section[data-tauri-drag-region-exclude].fixed.top-0.right-0,
+  [role="menu"][id^="button-overflow-"] {
+    background: Canvas !important;
+    color: CanvasText !important;
+    border-color: CanvasText !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
