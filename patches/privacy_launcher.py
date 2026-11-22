@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Disable optional EtlLauncher telemetry without breaking local diagnostics.
+"""Disable optional EternalLauncher telemetry without breaking local diagnostics.
 
 Applies to a fresh upstream modrinth/code checkout. Fail closed if an
 upstream change invalidates any guarded replacement.
@@ -38,12 +38,12 @@ def main() -> None:
     replace_once(
         rust_settings,
         "            telemetry: res.telemetry == 1,\n",
-        "            telemetry: false, // EtlLauncher: no optional usage analytics\n",
+        "            telemetry: false, // EternalLauncher: no optional usage analytics\n",
     )
     replace_once(
         rust_settings,
         "            self.telemetry,\n",
-        "            false, // EtlLauncher: persist telemetry disabled\n",
+        "            false, // EternalLauncher: persist telemetry disabled\n",
     )
 
     # Reflect the enforced setting in the UI while preserving other controls
@@ -59,15 +59,15 @@ def main() -> None:
         "defaultMessage:\n"
         "\t\t\t'Modrinth collects anonymized analytics and usage data to improve our user experience and customize your experience. By disabling this option, you opt out and your data will no longer be collected.',",
         "defaultMessage:\n"
-        "\t\t\t'Optional usage analytics and remote error reporting are disabled in EtlLauncher. Local logs and necessary online features still work.',",
+        "\t\t\t'Optional usage analytics and remote error reporting are disabled in Eternal. Local logs and necessary online features still work.',",
     )
     replace_once(
         privacy_page,
         "id: 'app.settings.privacy.telemetry.description'",
-        "id: 'etllauncher.settings.privacy.telemetry.description'",
+        "id: 'eternal.settings.privacy.telemetry.description'",
     )
 
-    print("EtlLauncher: optional telemetry disabled; Sentry not initialized.")
+    print("EternalLauncher: optional telemetry disabled; Sentry not initialized.")
     print("Local logs, download/network APIs and Discord Rich Presence remain unchanged.")
 
 
