@@ -33,6 +33,7 @@ def install_wallpaper() -> None:
     shutil.copyfile(BASE / "branding/wallpaper-settings.vue", display / "eternal-wallpaper-settings.vue")
     shutil.copyfile(BASE / "branding/appearance-remote.ts", display / "eternal-appearance.ts")
     shutil.copyfile(BASE / "branding/image-validation.ts", display / "eternal-image-validation.ts")
+    shutil.copyfile(BASE / "branding/particles.vue", display / "eternal-particles.vue")
 
     settings = display / "appearance-settings.vue"
     replace_once(
@@ -106,7 +107,7 @@ def install_wallpaper() -> None:
         main,
         "import App from '@/App.vue'",
         "import { applyEternalWallpaper } from '@/features/settings/display/eternal-wallpaper'\n"
-        "import { initializeEternalAppearance, mountEternalParticles } from '@/features/settings/display/eternal-appearance'\n"
+        "import { initializeEternalAppearance } from '@/features/settings/display/eternal-appearance'\n"
         "import App from '@/App.vue'",
     )
     replace_once(
@@ -117,13 +118,21 @@ def install_wallpaper() -> None:
 
 
 
-    # The main menu creates a small pointer-events:none CSS particle layer
-    # only after Vue mounts. It is hidden on all routes except the library.
+    # Mount seasonal particles in Vue itself, not with a short-lived DOM
+    # observer started before Modrinth finishes asynchronous initialization.
+    app = FRONTEND / "App.vue"
     replace_once(
-        main,
-        "\tapp.mount('#app')",
-        "\tapp.mount('#app')\n\tmountEternalParticles()",
+        app,
+        "import AppSidebar from '@/app/shell/sidebar/index.vue'",
+        "import EternalParticles from '@/features/settings/display/eternal-particles.vue'\n"
+        "import AppSidebar from '@/app/shell/sidebar/index.vue'",
     )
+    replace_once(
+        app,
+        '<div class="app-viewport flex-grow router-view">',
+        '<div class="app-viewport flex-grow router-view">\n\t\t\t<EternalParticles />',
+    )
+
 
 def install_news_config() -> None:
     cfg = json.loads((BASE / "branding/news-config.json").read_text(encoding="utf-8"))
