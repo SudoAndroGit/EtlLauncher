@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the EtlLauncher UI patch to a fresh checkout of modrinth/code.
+"""Apply the EternalLauncher UI patch to a fresh checkout of modrinth/code.
 
 Fail closed when upstream changes the required source snippets.
 """
@@ -21,9 +21,9 @@ def main() -> None:
     assert data["productName"] == "Modrinth App"
     assert data["mainBinaryName"] == "Modrinth App"
     assert data["app"]["windows"][0]["title"] == "Modrinth App"
-    data["productName"] = "EtlLauncher"
-    data["mainBinaryName"] = "EtlLauncher"
-    data["app"]["windows"][0]["title"] = "EtlLauncher"
+    data["productName"] = "EternalLauncher"
+    data["mainBinaryName"] = "EternalLauncher"
+    data["app"]["windows"][0]["title"] = "Eternal"
     # Keep the upstream identifier and data directories for compatibility.
     config.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
@@ -51,7 +51,7 @@ def main() -> None:
         "export async function areUpdatesEnabled() {\n\treturn await invoke('are_updates_enabled')\n}",
         "export async function areUpdatesEnabled() {\n\treturn false\n}",
     )
-    print("EtlLauncher name, ad UI and updater patch applied.")
+    print("EternalLauncher executable name, ad UI and updater patch applied.")
     print("Note: backend ad code remains; this is NOT a complete removal of ad infrastructure.")
 
 if __name__ == "__main__":
