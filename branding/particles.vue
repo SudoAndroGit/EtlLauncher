@@ -18,7 +18,20 @@ const particles = Array.from({ length: 18 }, (_, index) => ({
 </script>
 
 <template>
-  <div v-show="route.path === '/'" class="eternal-particles-layer" aria-hidden="true">
-    <span v-for="particle in particles" :key="particle.id" class="eternal-particle" :style="particle.style" />
-  </div>
+  <!-- The root viewport's backgrounds and overflow can cover/clamp children.
+       This decoration is painted above the home page, never over dialogs. -->
+  <Teleport to="body">
+    <div
+      v-if="route.path === '/' || route.path.startsWith('/library')"
+      class="eternal-particles-layer eternal-particles-fixed"
+      aria-hidden="true"
+    >
+      <span
+        v-for="particle in particles"
+        :key="particle.id"
+        class="eternal-particle"
+        :style="particle.style"
+      />
+    </div>
+  </Teleport>
 </template>
