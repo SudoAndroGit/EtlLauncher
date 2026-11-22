@@ -793,3 +793,117 @@
     background: Canvas !important;
   }
 }
+
+
+/* === Eternal Glassy v3.2 — aligned floating rail and translucent sidebar ===
+ * Adjustments from the user-marked screenshot. A pure CSS layer: no changes
+ * to layout JS, instance grid virtualization, event handlers, or fonts.
+ */
+
+/* The 64px Modrinth rail had a decorative pane starting 12px *below*
+ * its first 48px navigation button. Use the rail itself as the glass panel,
+ * with enough padding for the first and last controls.
+ * A slightly wider 80px column provides a visible gutter before content.
+ */
+.app-grid-layout.app-grid-layout,
+.app-contents.app-contents {
+  --left-bar-width: 5rem;
+}
+.app-grid-layout .app-grid-navbar {
+  width: calc(var(--left-bar-width) - 16px) !important;
+  margin: 10px 8px 10px !important;
+  padding: 10px 7px !important;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 6px !important;
+  border: 1px solid var(--eternal-v3-rail-stroke) !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(155deg, var(--eternal-glass-white-reflection), transparent 65%),
+    var(--eternal-v3-rail-pane) !important;
+  box-shadow:
+    inset 0 1px 0 var(--eternal-glass-soft-reflection),
+    0 9px 26px -20px var(--eternal-glass-shadow) !important;
+}
+.app-grid-layout .app-grid-navbar::after {
+  content: none !important;
+}
+/* Keep every 48px navigation icon inside the rounded rail at the
+ * same x-axis; no translate/scale that could move the click target.
+ */
+.app-grid-layout .app-grid-navbar > .nav-button {
+  flex-shrink: 0;
+  align-self: center;
+}
+.app-grid-layout .app-grid-navbar [data-button]:has(> .avatar.circle) {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  padding: 8px !important;
+  border-radius: 999px !important;
+  background: var(--eternal-v3-quiet-button) !important;
+  border: 1px solid var(--eternal-glass-outline) !important;
+}
+.app-grid-layout .app-grid-navbar [data-button]:has(> .avatar.circle):hover {
+  background: var(--eternal-v3-quiet-hover) !important;
+}
+.app-grid-layout .app-grid-navbar [data-button] > .avatar.circle {
+  border-radius: 50% !important;
+  overflow: hidden;
+}
+
+/* The background image is intended to show through the right-hand column,
+ * rather than ending abruptly at a completely opaque purple strip.
+ * Inner modules remain darker to protect text and news readability.
+ */
+:root {
+  --eternal-glass-sidebar: rgba(38, 22, 40, .38);
+  --eternal-glass-module-bg: rgba(38, 22, 40, .45);
+  --eternal-glass-news-bg:
+    linear-gradient(150deg, rgba(255, 255, 255, .045), rgba(44, 25, 46, .55));
+}
+:root.light-mode,
+.light-mode,
+:root.light,
+.light {
+  --eternal-glass-sidebar: rgba(255, 246, 251, .62);
+  --eternal-glass-module-bg: rgba(255, 247, 252, .80);
+  --eternal-glass-news-bg:
+    linear-gradient(150deg, rgba(255, 255, 255, .91), rgba(255, 243, 251, .78));
+}
+.app-contents.app-contents {
+  --eternal-glass-content: rgba(29, 16, 33, .47);
+}
+:root.light-mode .app-contents.app-contents,
+.light-mode .app-contents.app-contents,
+:root.light .app-contents.app-contents,
+.light .app-contents.app-contents {
+  --eternal-glass-content: rgba(255, 248, 252, .65);
+}
+/* Retain a thin visual divider without an opaque sidebar background. */
+.app-contents .app-sidebar {
+  border-left-color: var(--eternal-v3-divider) !important;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .app-grid-layout .app-grid-navbar {
+    background: var(--eternal-v3-rail-pane) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  .app-contents.app-contents {
+    --eternal-glass-content: rgba(29, 16, 33, .90);
+  }
+  .app-contents .app-sidebar {
+    background: var(--eternal-v3-rail-pane) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .app-grid-layout .app-grid-navbar,
+  .app-grid-layout .app-grid-navbar [data-button]:has(> .avatar.circle) {
+    background: Canvas !important;
+    border-color: CanvasText !important;
+    box-shadow: none !important;
+  }
+}
