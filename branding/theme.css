@@ -1496,3 +1496,23 @@ body > .eternal-particles-layer .eternal-particle {
     border-color: CanvasText !important;
   }
 }
+
+
+/* v4.2 Theme preview isolation: the open Settings dialog can be Sakura
+ * or OLED, but each thumbnail must still show its OWN intended color.
+ */
+:root.sakura-mode .modal-body .preview.sakura-mode .example-card,
+:root.oled-mode .modal-body .preview.sakura-mode .example-card {
+  background: #39243f !important;
+  border-color: rgba(245,181,213,.25) !important;
+}
+:root.sakura-mode .modal-body .preview.oled-mode .example-card,
+:root.oled-mode .modal-body .preview.oled-mode .example-card {
+  background: #101013 !important;
+  border-color: #25262b !important;
+}
+:root.sakura-mode .modal-body .preview.light-mode .example-card,
+:root.oled-mode .modal-body .preview.light-mode .example-card {
+  background: #f7f5f7 !important;
+  border-color: #ddd5dd !important;
+}
