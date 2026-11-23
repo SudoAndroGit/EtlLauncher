@@ -44,6 +44,8 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      eternal_version: ${{ steps.eternal.outputs.version }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -51,6 +53,15 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24.15.0'
+      - name: Read EternalLauncher version
+        id: eternal
+        run: |
+          version="$(node -p "require('./branding/eternal-version.json').version")"
+          if [[ ! "$version" =~ ^[0-9]{1,6}\.[0-9]{1,6}\.[0-9]{1,6}$ ]]; then
+            echo 'Invalid EternalLauncher version.'
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - run: node --test
       - name: Require main for publication
         if: github.event_name == 'workflow_dispatch' && inputs.publish_release
@@ -303,7 +314,7 @@ jobs:
 
   release:
     name: Publish private downloadable release
-    needs: build
+    needs: [validate, build]
     if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.publish_release == true }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -335,14 +346,15 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          ETERNAL_VERSION: ${{ needs.validate.outputs.eternal_version }}
           UPSTREAM_TAG: ${{ needs.build.outputs.upstream_tag }}
           UPSTREAM_SHA: ${{ needs.build.outputs.upstream_sha }}
           BUILD_NUMBER: ${{ github.run_number }}
           BUILD_ATTEMPT: ${{ github.run_attempt }}
         run: |
           set -euo pipefail
-          release_tag="eternal-${UPSTREAM_TAG}-build.${BUILD_NUMBER}.${BUILD_ATTEMPT}"
-          title="EternalLauncher Sakura Edition ${UPSTREAM_TAG} (build ${BUILD_NUMBER}.${BUILD_ATTEMPT})"
+          release_tag="eternallauncher-v${ETERNAL_VERSION}-build.${BUILD_NUMBER}.${BUILD_ATTEMPT}"
+          title="EternalLauncher Sakura Edition v${ETERNAL_VERSION} (build ${BUILD_NUMBER}.${BUILD_ATTEMPT})"
           cat > release-notes.md <<EOF
           EternalLauncher Sakura Edition — private experimental Windows x64 build.
 

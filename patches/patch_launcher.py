@@ -87,6 +87,8 @@ def main() -> None:
     data["mainBinaryName"] = "EternalLauncher"
     data["app"]["windows"][0]["title"] = "Eternal"
     data["identifier"] = "com.eternal.launcher"
+    csp = data["app"]["security"]["csp"]
+    csp["connect-src"] += " https://api.github.com"
     data["build"]["beforeBuildCommand"] = (
         "pnpm -w i18n:coverage && pnpm --filter @modrinth/app-frontend run build"
     )
