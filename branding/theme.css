@@ -1568,3 +1568,61 @@ body > .eternal-particles-layer .eternal-particle {
     animation: eternal-lava-fall var(--lava-duration, 11s) cubic-bezier(.35,.05,.65,1) var(--particle-delay) infinite !important;
   }
 }
+
+
+/* === Eternal v4.4: targeted UI polish (only existing known components) === */
+
+/* Stop belongs to the red/danger family, not the generic Sakura-pink button.
+ * A unique Vue class avoids recoloring Play, Delete or any other action.
+ * Keyboard focus retains an explicit outline independent of box-shadow.
+ */
+:root .app-contents .app-viewport [data-button].button-frame--colored.eternal-stop-action {
+  background: linear-gradient(180deg, #f85576 0%, #e83a61 100%) !important;
+  border: 1px solid #b72d4b !important;
+  color: #2a0b14 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 214, 227, .21),
+              0 0 0 1px rgba(112, 25, 44, .28),
+              0 4px 11px rgba(142, 31, 57, .20) !important;
+}
+:root .app-contents .app-viewport [data-button].button-frame--colored.eternal-stop-action:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ef4569 0%, #d82c54 100%) !important;
+  border-color: #9e213f !important;
+}
+:root .app-contents .app-viewport [data-button].button-frame--colored.eternal-stop-action::before {
+  background: linear-gradient(180deg, rgba(255, 228, 239, .15), transparent 75%) !important;
+}
+:root .app-contents .app-viewport [data-button].button-frame--colored.eternal-stop-action:focus-visible {
+  outline: 2px solid #ffbfd1 !important;
+  outline-offset: 2px;
+}
+
+/* Focus/selection highlights inside the skin tiles cannot be clipped by the
+ * virtual list, while preserving focus visibility and rounded corners.
+ */
+:root .app-contents .skin-layout .skin-button.skin-button--selected {
+  border: 2px solid #eaa3c4 !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 221, 239, .44),
+              0 2px 5px rgba(0, 0, 0, .12) !important;
+}
+:root .app-contents .skin-layout .skin-button:has(> button:focus-visible) {
+  outline: none !important;
+  box-shadow: inset 0 0 0 2px #f5b9d4, 0 2px 5px rgba(0, 0, 0, .13) !important;
+}
+:root .app-contents .skin-layout .eternal-skin-add-card:focus-within {
+  outline: none !important;
+  border-color: #e69cbd !important;
+  box-shadow: inset 0 0 0 2px #f2b8d2 !important;
+}
+:root .app-contents .skin-layout .eternal-skin-add-card:focus-within > button {
+  outline: none !important;
+}
+
+/* NormalPage teleports profile badges into the sidebar. This prevents
+ * sidebar-teleport-content from being empty and hides friends/news by default.
+ * Keep badges AND reveal the usual Minecraft account, friends and news.
+ * Only applies while viewing a user profile, never to projects or library.
+ */
+:root .app-contents:has(.eternal-user-profile-page) .app-sidebar
+  .sidebar-default-content.sidebar-enabled {
+  display: contents !important;
+}
