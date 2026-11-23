@@ -12,8 +12,10 @@ import {
 } from './eternal-wallpaper'
 import {
 	getEternalParticleChoice,
+	getEternalParticleMotionOverride,
 	getEternalWallpaperChoice,
 	setEternalParticleChoice,
+	setEternalParticleMotionOverride,
 	setEternalWallpaperChoice,
 	type ParticleChoice,
 	type WallpaperChoice,
@@ -25,6 +27,7 @@ const blur = ref(initialEffects.blur)
 const sidebarTransparency = ref(getEternalSidebarTransparency())
 const wallpaperChoice = ref<WallpaperChoice>(getEternalWallpaperChoice())
 const particleChoice = ref<ParticleChoice>(getEternalParticleChoice())
+const forceParticleMotion = ref(getEternalParticleMotionOverride())
 const input = ref<HTMLInputElement | null>(null)
 const custom = ref(hasEternalWallpaper())
 const busy = ref(false)
@@ -67,6 +70,10 @@ function updateWallpaperMode(mode: WallpaperChoice) {
 
 function updateParticleMode() {
 	setEternalParticleChoice(particleChoice.value)
+}
+
+function updateParticleMotionOverride() {
+	setEternalParticleMotionOverride(forceParticleMotion.value)
 }
 
 function updateSidebarTransparency() {
@@ -169,7 +176,16 @@ function restoreDefault() {
 				<option value="navidad">Navidad (copos de nieve)</option>
 			</select>
 		</div>
-		<p class="eternal-wallpaper-hint">Las opciones manuales no se sobrescriben con las configuraciones remotas. Se respeta la reducción de movimiento del sistema.</p>
+		<label class="eternal-particle-motion-override" for="eternal-particle-force-motion">
+			<input
+				id="eternal-particle-force-motion"
+				v-model="forceParticleMotion"
+				type="checkbox"
+				@change="updateParticleMotionOverride"
+			/>
+			<span>Mostrar partículas aunque Windows tenga activado el movimiento reducido</span>
+		</label>
+		<p class="eternal-wallpaper-hint">Las opciones manuales no se sobrescriben con la configuración remota. Por defecto se respeta la reducción de movimiento de Windows; puedes permitir estas animaciones solo en Eternal mediante la opción anterior.</p>
 	</section>
 	<section class="eternal-wallpaper-settings">
 		<h3>Panel derecho</h3>
@@ -196,6 +212,9 @@ function restoreDefault() {
 </template>
 
 <style scoped>
+.eternal-particle-motion-override { display: flex; align-items: flex-start; gap: .75rem; margin-top: 1rem; color: var(--color-contrast); cursor: pointer; line-height: 1.45; font-size: .88rem; }
+.eternal-particle-motion-override input { flex: 0 0 auto; width: 18px; height: 18px; margin: 1px 0 0; cursor: pointer; accent-color: #edabc9; }
+.eternal-particle-motion-override input:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
 .eternal-wallpaper-settings {
 	margin-top: 1.5rem;
 	padding: 1.25rem;
