@@ -116,6 +116,11 @@ jobs:
         shell: pwsh
         run: python patches/sakura_themes.py
 
+      - name: Polish running buttons, skin focus and profile sidebar
+        if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: python patches/ui_polish.py
+
       - name: Disable optional telemetry and remote error reports
         if: github.event_name == 'workflow_dispatch' || steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
