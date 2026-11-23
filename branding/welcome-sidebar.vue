@@ -4,12 +4,15 @@ import { openUrl } from '@tauri-apps/plugin-opener'
 
 import welcome from './eternal-welcome.json'
 import feedConfig from './eternal-news-config.json'
+import { fetchEternalJson } from './eternal-remote-content'
 
 const CACHE_KEY = 'eternal-news-cache-v1'
 const MAX_BODY_CHARS = 850
 const MAX_ITEMS = 5
+const MAX_NEWS_BYTES = 100_000
 
 function safeHttpsUrl(value) {
+	if (typeof value !== 'string' || value.length > 2048) return null
 	try {
 		const url = new URL(value)
 		return url.protocol === 'https:' && !url.username && !url.password ? url.href : null
@@ -46,6 +49,7 @@ function parseFeed(payload) {
 			body,
 			date: typeof item.date === 'string' ? item.date.slice(0, 30) : '',
 			url: href,
+			domain: href ? new URL(href).host : '',
 		}
 	}).filter(Boolean)
 	if (!cleaned.length) throw new Error('El archivo no contiene noticias válidas')
@@ -57,7 +61,9 @@ function parseFeed(payload) {
 
 function loadCache() {
 	try {
-		const entry = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null')
+		const stored = localStorage.getItem(CACHE_KEY)
+		if (!stored || stored.length > MAX_NEWS_BYTES) return
+		const entry = JSON.parse(stored)
 		if (entry?.url !== feedUrl) return
 		const content = parseFeed(entry.data)
 		articles.value = content.items
@@ -72,18 +78,15 @@ async function refreshNews() {
 	if (!feedUrl || loading.value) return
 	const controller = new AbortController()
 	activeController = controller
-	const timeout = setTimeout(() => controller.abort(), 8000)
 	loading.value = true
 	feedError.value = ''
 	try {
-		const response = await fetch(feedUrl, { cache: 'no-cache', signal: controller.signal })
-		if (!response.ok) throw new Error('HTTP ' + response.status)
-		if (Number(response.headers.get('content-length') || 0) > 100_000) {
-			throw new Error('Archivo de noticias demasiado grande')
-		}
-		const text = await response.text()
-		if (text.length > 100_000) throw new Error('Archivo de noticias demasiado grande')
-		const raw = JSON.parse(text)
+		const raw = await fetchEternalJson(feedUrl, {
+			maxBytes: MAX_NEWS_BYTES,
+			timeoutMs: 8000,
+			signal: controller.signal,
+		})
+		if (controller.signal.aborted) return
 		const parsed = parseFeed(raw)
 		articles.value = parsed.items
 		updateDate.value = parsed.updated_at
@@ -97,11 +100,10 @@ async function refreshNews() {
 			// No local storage is needed to show the news.
 		}
 	} catch {
-		if (!controller.signal.aborted || articles.value.length === 0) {
+		if (!controller.signal.aborted) {
 			feedError.value = 'Sin conexión. Mostrando las últimas noticias disponibles.'
 		}
 	} finally {
-		clearTimeout(timeout)
 		if (activeController === controller) activeController = undefined
 		loading.value = false
 	}
@@ -136,11 +138,13 @@ onUnmounted(() => {
 				<div class="eternal-welcome-eyebrow">
 					Noticias de Eternal
 				</div>
-				<div v-for="article in articles" :key="article.id" class="eternal-news-article">
+				<div v-for="(article, index) in articles" :key="`${article.id}:${index}`" class="eternal-news-article">
 					<time v-if="article.date" class="eternal-news-date">{{ article.date }}</time>
 					<h3 class="eternal-welcome-title">{{ article.title }}</h3>
 					<p class="eternal-welcome-description">{{ article.body }}</p>
-					<button v-if="article.url" type="button" class="eternal-news-link" @click="openArticle(article.url)">Leer más ↗</button>
+					<button v-if="article.url" type="button" class="eternal-news-link" @click="openArticle(article.url)">
+						Leer más · {{ article.domain }} ↗
+					</button>
 				</div>
 				<p v-if="cached || feedError" class="eternal-news-status">{{ feedError || 'Últimas noticias guardadas.' }}</p>
 				<p v-else-if="updateDate" class="eternal-news-date">Actualizado: {{ updateDate }}</p>
@@ -257,6 +261,7 @@ onUnmounted(() => {
 	color: var(--color-brand);
 	text-decoration: underline;
 	cursor: pointer;
+	overflow-wrap: anywhere;
 }
 .eternal-news-refresh {
 	margin-top: .85rem;

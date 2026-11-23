@@ -3,9 +3,12 @@
  * No remote HTML, JavaScript, or unvalidated image URLs go into CSS.
  */
 import feedConfig from '@/features/news/eternal-news-config.json'
-import { MAX_IMAGE_BYTES, validateEternalImage } from './eternal-image-validation'
+import { invoke } from '@tauri-apps/api/core'
+import { fetchEternalContent, fetchEternalJson } from '@/features/news/eternal-remote-content'
+import { detectedType, MAX_IMAGE_BYTES, validateEternalImage } from './eternal-image-validation'
+import { hasEternalWallpaper, hasRestoredEternalWallpaper } from './eternal-wallpaper'
 
-export type WallpaperChoice = 'default' | 'sakura' | 'custom'
+export type WallpaperChoice = 'default' | 'sakura' | 'custom' | 'windows'
 export type ParticleChoice = 'default' | 'sakura' | 'lava' | 'otono' | 'primavera' | 'navidad' | 'none'
 type RemoteAppearance = { wallpaper?: string; particles: Exclude<ParticleChoice, 'default'> }
 
@@ -19,6 +22,9 @@ let fetched = false
 let validatedRemoteUrl: string | null = null
 let validatedSource: string | null = null
 let downloadAttempt: string | null = null
+let windowsWallpaperUrl: string | null = null
+let windowsWallpaperDigest: string | null = null
+let windowsRefresh: Promise<void> | undefined
 
 function readSetting(key: string): string | null {
   try { return localStorage.getItem(key) } catch { return null }
@@ -28,8 +34,8 @@ function saveSetting(key: string, value: string) {
 }
 export function getEternalWallpaperChoice(): WallpaperChoice {
   const value = readSetting(WALLPAPER_CHOICE_KEY)
-  if (value === 'default' || value === 'sakura' || value === 'custom') return value
-  return readSetting('eternal.wallpaper.v1') || readSetting('eternal.wallpaper.gif.v1') ? 'custom' : 'default'
+  if (value === 'default' || value === 'sakura' || value === 'custom' || value === 'windows') return value
+  return hasRestoredEternalWallpaper() ? 'custom' : 'default'
 }
 export function getEternalParticleChoice(): ParticleChoice {
   const value = readSetting(PARTICLE_CHOICE_KEY)
@@ -48,12 +54,45 @@ function applyWallpaperChoice() {
   const mode = getEternalWallpaperChoice()
   if (mode === 'custom') {
     root.style.setProperty('--eternal-active-wallpaper', 'var(--eternal-custom-wallpaper, url("/eternal-default-sakura.webp"))')
+  } else if (mode === 'windows' && windowsWallpaperUrl) {
+    root.style.setProperty('--eternal-active-wallpaper', 'url("' + windowsWallpaperUrl + '")')
   } else if (mode === 'default' && validatedRemoteUrl && validatedSource === remote.wallpaper) {
     root.style.setProperty('--eternal-active-wallpaper', 'url("' + validatedRemoteUrl + '")')
   } else {
     root.style.setProperty('--eternal-active-wallpaper', 'url("/eternal-default-sakura.webp")')
   }
   root.dataset.eternalWallpaperChoice = mode
+}
+async function loadWindowsWallpaper(): Promise<void> {
+  try {
+    const data = await invoke<ArrayBuffer | number[]>('read_windows_wallpaper')
+    const bytes = data instanceof ArrayBuffer ? new Uint8Array(data)
+      : Array.isArray(data) && data.length <= MAX_IMAGE_BYTES ? Uint8Array.from(data) : null
+    if (!bytes?.byteLength || bytes.byteLength > MAX_IMAGE_BYTES) {
+      throw new Error('Windows no devolvió una imagen de fondo válida.')
+    }
+    const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))).join(',')
+    if (digest === windowsWallpaperDigest || getEternalWallpaperChoice() !== 'windows') return
+    const mime = detectedType(bytes)
+    const file = new Blob([bytes], { type: mime })
+    await validateEternalImage(file, 'desktop.' + mime.slice(6))
+    if (getEternalWallpaperChoice() !== 'windows') return
+    if (windowsWallpaperUrl) URL.revokeObjectURL(windowsWallpaperUrl)
+    windowsWallpaperUrl = URL.createObjectURL(file)
+    windowsWallpaperDigest = digest
+  } catch (error) {
+    if (windowsWallpaperUrl) URL.revokeObjectURL(windowsWallpaperUrl)
+    windowsWallpaperUrl = null
+    windowsWallpaperDigest = null
+    throw error
+  } finally {
+    if (getEternalWallpaperChoice() === 'windows') applyWallpaperChoice()
+  }
+}
+
+export async function refreshWindowsWallpaper(): Promise<void> {
+  if (getEternalWallpaperChoice() !== 'windows') return
+  await (windowsRefresh ??= loadWindowsWallpaper().finally(() => { windowsRefresh = undefined }))
 }
 function applyParticleChoice() {
   const mode = getEternalParticleChoice()
@@ -89,59 +128,17 @@ function appearanceUrl(): URL | null {
   } catch { return null }
 }
 
-/** Stream with a hard byte cap even if the server omits Content-Length. */
-async function readLimitedImage(url: string): Promise<Blob | null> {
-  const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), 12_000)
-  try {
-    const response = await fetch(url, {
-      signal: controller.signal, cache: 'no-cache', credentials: 'omit',
-      redirect: 'error', mode: 'cors',
-    })
-    if (!response.ok || !response.body) return null
-    const advertised = Number(response.headers.get('content-length') ?? 0)
-    if (!Number.isFinite(advertised) || advertised < 0 || advertised > MAX_IMAGE_BYTES) return null
-    const declaredType = (response.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase()
-    if (declaredType && declaredType !== 'application/octet-stream' &&
-      !['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(declaredType)) return null
-    const reader = response.body.getReader()
-    const parts: Uint8Array[] = []
-    let total = 0
-    try {
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        total += value.byteLength
-        if (total > MAX_IMAGE_BYTES) {
-          await reader.cancel().catch(() => {})
-          return null
-        }
-        parts.push(value)
-      }
-    } finally {
-      reader.releaseLock()
-    }
-    if (!total) return null
-    const assembled = new Uint8Array(total)
-    let offset = 0
-    for (const part of parts) {
-      assembled.set(part, offset)
-      offset += part.byteLength
-    }
-    return new Blob([assembled.buffer], { type: declaredType })
-  } catch {
-    return null
-  } finally {
-    window.clearTimeout(timeout)
-  }
-}
 async function loadValidatedRemoteWallpaper(): Promise<void> {
   const source = remote.wallpaper
   if (!source || getEternalWallpaperChoice() !== 'default' || downloadAttempt === source) return
   downloadAttempt = source
-  const file = await readLimitedImage(source)
-  if (!file) return
   try {
+    const file = await fetchEternalContent(source, {
+      maxBytes: MAX_IMAGE_BYTES,
+      timeoutMs: 12_000,
+      cache: 'default',
+      allowedTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif'],
+    })
     const filename = new URL(source).pathname.split('/').pop() ?? ''
     await validateEternalImage(file, filename)
     const safeUrl = URL.createObjectURL(file)
@@ -160,18 +157,14 @@ export async function initializeEternalAppearance(): Promise<void> {
   applyParticleChoice()
   if (fetched) return
   fetched = true
+  const refreshOnFocus = () => { void refreshWindowsWallpaper().catch(() => {}) }
+  window.addEventListener('focus', refreshOnFocus)
+  refreshOnFocus()
+  const wallpaperReady = hasEternalWallpaper().then(() => applyWallpaperChoice())
   const url = appearanceUrl()
   if (!url) return
-  const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), 5500)
   try {
-    const response = await fetch(url.href, {
-      signal: controller.signal, cache: 'no-cache', credentials: 'omit', redirect: 'error',
-    })
-    if (!response.ok || Number(response.headers.get('content-length') || '0') > 4096) return
-    const text = await response.text()
-    if (text.length > 4096) return
-    const payload: unknown = JSON.parse(text)
+    const payload = await fetchEternalJson(url.href, { maxBytes: 4096, timeoutMs: 5500 })
     if (!payload || typeof payload !== 'object') return
     const data = payload as Record<string, unknown>
     if (data.version !== 1) return
@@ -180,8 +173,8 @@ export async function initializeEternalAppearance(): Promise<void> {
     remote = { wallpaper: sameOriginImage(data.wallpaper, url), particles }
     applyWallpaperChoice()
     applyParticleChoice()
+    await wallpaperReady
     if (getEternalWallpaperChoice() === 'default') void loadValidatedRemoteWallpaper()
   } catch { /* offline is supported */ }
-  finally { clearTimeout(timeout) }
 }
 

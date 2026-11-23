@@ -40,15 +40,17 @@ Para que la apariencia siga siendo segura al actualizar, la nueva capa se aplica
 
 El panel izquierdo ahora tiene una **columna de 112 px y una barra Sakura de 88 px**, desplazada 16 px hacia el interior. Los controles redondos de Inicio y perfil caben completos en su borde. Los controles personalizados de la ventana, situados en la esquina superior derecha, y los menús desplegables de cuenta utilizan la misma paleta ciruela/rosa del launcher, incluidos los modos claro y alto contraste.
 
-En **Ajustes → Apariencia → Fondo de Eternal**, los modos se ofrecen como **tres botones**: **Sincronizado**, **Sakura** y **Personalizado**. Solo al seleccionar Personalizado aparece la opción de elegir/cambiar JPG, PNG, WebP o GIF; la elección sigue guardándose localmente. Los fondos mantienen el filtro de seguridad de **22 MiB** y los límites de resolución. El ajuste de partículas muestra **Sincronizado** en lugar de «Predeterminado (sincronizado)».
+En **Ajustes → Apariencia → Fondo de Eternal**, puedes elegir **Sincronizado**, **Sakura**, **Personalizado** o **Escritorio de Windows**. En Personalizado puedes agregar varias imágenes o GIF a la vez y cambiar entre los fondos guardados. Los fondos mantienen el límite de **22 MiB** por archivo y los límites de resolución. El ajuste de partículas muestra **Sincronizado** en lugar de «Predeterminado (sincronizado)».
 
 Las partículas se montan desde `branding/particles.vue` mediante Vue Teleport a una capa decorativa sobre Inicio (no dentro de las capas recortables del viewport). No usan observadores temporales ni capturan clics. Se muestran **22 partículas**; la opción Lava utiliza gotas luminosas con caída propia, sin el giro de los pétalos. Por defecto se respeta la reducción de movimiento de Windows, pero el usuario puede activar la casilla **«Mostrar partículas aunque Windows tenga activado el movimiento reducido»** en Ajustes → Apariencia. Esta elección solo afecta a Eternal, se almacena localmente en `eternal.particles.ignore-reduced-motion.v1` y **nunca** reactiva el modo «Desactivadas» ni anula los colores forzados de accesibilidad.
 
 ## Fondo personalizado
 
-En **Ajustes → Apariencia → Fondo de Eternal** puedes seleccionar **Sincronizado**, **Sakura (integrado)** o **Personalizado**. El modo personalizado permite JPG, PNG, WebP y GIF animados de hasta **22 MB**. El selector conserva la ilustración Sakura incluida en cada compilación. Las imágenes fijas se reducen y guardan en localStorage; los GIF animados se almacenan como archivos Blob en IndexedDB para conservar todos sus fotogramas.
+**Personalizado** tiene una galería local con hasta 12 imágenes JPG, PNG, WebP o GIF animados. Puedes elegir un fondo guardado o quitarlo de la galería. La selección se recupera al reiniciar Eternal.
 
-Las fotografías (no GIF) se **reducen localmente** a un máximo de 1920×1080 y se guardan comprimidas en el almacenamiento local del WebView. Los GIF válidos se conservan animados en IndexedDB (sujetos a la cuota de almacenamiento disponible). No se suben a ningún servicio ni se añaden permisos de sistema. Si se borran los datos del WebView, la personalización se perderá.
+Las imágenes fijas se reducen localmente a un máximo de 1920×1080 y se comprimen de forma asíncrona. Los fondos fijos y los GIF animados se guardan como archivos Blob en IndexedDB. Eternal también puede abrir los fondos guardados por versiones anteriores. Los archivos se mantienen en el dispositivo y se eliminan al borrar los datos del WebView.
+
+**Escritorio de Windows** usa la imagen que Windows informa como fondo activo. La vista se actualiza cuando vuelves a Eternal o pulsas **Actualizar desde Windows**. Si Windows usa un color sólido o la imagen no cumple los límites y formatos admitidos, Eternal muestra Sakura.
 
 ### Validación de imágenes antes de aceptarlas
 
@@ -59,7 +61,7 @@ Tanto los archivos locales como las imágenes obtenidas de `appearance.json` deb
 - **Fondos remotos**: solo HTTPS y el mismo origen que el archivo `appearance.json`, sin redirecciones. Se valida el flujo de descarga mientras llega (límite real de 22 MiB aunque falte `Content-Length`), formato, dimensiones y decodificación **antes** de aplicar el fondo. Si falla, se muestra Sakura integrado.
 - **Seguridad**: estos controles mitigan archivos malformados y problemas de recursos, pero no sustituyen las actualizaciones del motor de imágenes/WebView2, ni garantizan ausencia total de vulnerabilidades.
 
-Las 14 pruebas automáticas de firmas, límites y GIF están en `tests/image-validation.test.mjs`. El workflow las ejecuta con Node 24 **antes** de instalar dependencias y compilar. Una prueba fallida detiene el build; nunca garantiza por sí sola que la interfaz final funcione en Windows.
+Ejecuta `node --test` con Node 24 para comprobar la validación de imágenes y los límites de las descargas. GitHub Actions ejecuta estas pruebas en un trabajo separado, incluso cuando la caché permite omitir la compilación.
 
 En **Ajustes → Apariencia → Fondo de Eternal**, dos deslizadores se aplican en tiempo real al fondo predeterminado o al personalizado: **Oscurecimiento** (capa oscura, 0–100 %) y **Desenfoque** (0–24 px, solo sobre la imagen). Reemplazamos el antiguo desvanecimiento por desenfoque. Se conserva el oscurecimiento de instalaciones anteriores; los nuevos ajustes se guardan localmente y persisten al reiniciar.
 
@@ -103,7 +105,7 @@ El panel lateral carga noticias desde un archivo JSON público por HTTPS. Consul
 
 Formato del archivo: `{ "version": 1, "updated_at": "AAAA-MM-DD", "items": [{ "id": "novedad", "title": "Título", "body": "Contenido de texto", "date": "AAAA-MM-DD", "url": "https://enlace-opcional" }] }`.
 
-Las noticias se muestran como **texto plano**, nunca HTML, con máximo cinco entradas, límites de tamaño, enlaces HTTPS y consulta de red con timeout. No requiere cuentas, tokens, base de datos ni servidor propio. **Hasta configurar y publicar una URL real, las noticias remotas no están activas**; la bienvenida de Eternal permanece.
+Las noticias se muestran como texto plano, con un máximo de cinco entradas. La descarga se cancela al superar 100 000 bytes y usa HTTPS sin cookies ni redirecciones. Cada enlace muestra el dominio que se abrirá. Si la URL queda vacía o no hay acceso a Internet, Eternal usa las últimas noticias guardadas o la bienvenida integrada.
 
 ## Rendimiento del workflow
 
@@ -143,15 +145,25 @@ No hace falta un bot, un token ni abrir puertos. La opción Discord Rich Presenc
 
 ## Construir
 
+### Instalar en Windows
+
+Descarga el instalador NSIS de Windows x64 de la Release que te compartieron. Compara su SHA-256 con `SHA256SUMS.txt` y ejecuta el instalador. Lee la política de privacidad en español y pulsa **Leído** para continuar. El asistente incluye el texto original de la licencia GPLv3. Una vez instalado, abre **EternalLauncher** desde Inicio. El instalador usa una carpeta de aplicación propia y guarda los datos del launcher en `%APPDATA%\com.eternal.launcher`. La compilación de desarrollo local usa un perfil aparte.
+
+### Generar el instalador con GitHub Actions
+
 1. Abre **Actions → Build EternalLauncher (experimental) → Run workflow**.
 2. Descarga el artefacto `EternalLauncher-vX.Y.Z-windows-x64` cuando termine correctamente.
 3. Extrae el instalador `.exe` y haz una copia de seguridad de las instancias antes de instalar.
 
-El workflow revisa las versiones oficiales cada seis horas; los cambios en `patches/**`, `branding/**` y el workflow inician una nueva compilación. Los parches fallan explícitamente si cambia una sección esencial del código fuente original.
+Las compilaciones manuales y las de `main` usan `MODRINTH_TAG` y `MODRINTH_COMMIT`, fijados en `.github/workflows/build.yml`. Cada seis horas, el workflow comprueba la última versión estable de Modrinth y compila el commit correspondiente si no hay una compilación en caché. Para actualizar la base de Eternal, cambia el tag y el SHA después de revisar que los parches se apliquen y probar el instalador. Las publicaciones manuales desde `main` registran el commit exacto de Modrinth y el commit de Eternal.
 
 ## Publicar una Release privada
 
 En **Run workflow**, marca **Publish a private GitHub Release after the build succeeds** para publicar el instalador y su comprobación SHA-256 en https://github.com/WildMCs/EtlLauncher/releases. Las publicaciones se marcan como versiones experimentales; las automáticas no publican Releases por sí solas.
+
+### Archivos para GitHub
+
+Incluye `.github/workflows/build.yml`, `.gitignore`, `README.md`, `branding/`, `patches/`, `public-news/` y `tests/`. Esto incluye los archivos nuevos del fondo de Windows y cualquier eliminación intencional en `public-news/`. Los scripts de desarrollo de esta máquina viven en `scripts/` y Git los ignora. Publica el instalador y su SHA-256 como archivos de la Release. El acceso a una Release de un repositorio privado depende de los permisos de acceso al repositorio.
 
 ## Estructura
 
@@ -169,9 +181,9 @@ En **Run workflow**, marca **Publish a private GitHub Release after the build su
 
 ## Avisos y compatibilidad
 
-- Se conserva el identificador original de Tauri y los datos de Modrinth por compatibilidad. Si ya tienes Modrinth instalado, respalda tus instancias; el instalador personalizado puede interferir con esa instalación.
+- El instalador usa el identificador `com.eternal.launcher` y un perfil propio. Los archivos `.mrpack` se pueden importar desde el launcher. La instalación evita registrar las asociaciones de archivos y enlaces de Modrinth en Windows.
 - No hay firma comercial: Windows podría advertir sobre aplicaciones desconocidas.
-- Este es un trabajo derivado de Modrinth y continúa usando sus servicios y APIs. El logo personalizado es derivado de la marca original; su uso o distribución podría requerir permisos. **No lo presentes como un producto oficial**.
+- EternalLauncher es una distribución independiente. Para redistribuir el instalador, conserva los avisos de licencia y ofrece el código fuente correspondiente al binario, incluyendo el commit base y los parches. Verifica los derechos de redistribución del icono, las imágenes y cualquier recurso de marca incluido. [Licencia del launcher base](https://github.com/modrinth/code/blob/e30eb38e77566cbca6502dad93142d5ba892cd87/apps/app/LICENSE) · [Pautas de marcas de Modrinth](https://github.com/modrinth/code/blob/e30eb38e77566cbca6502dad93142d5ba892cd87/COPYING.md)
 - Las nuevas personalizaciones requieren verificar una compilación y su aspecto en Windows antes de considerarlas estables.
 
 
@@ -185,3 +197,12 @@ El paso guardado `patches/ui_polish.py` se ejecuta después de los temas y **ant
 - **Perfiles de usuario** conserva las insignias y organizaciones en la barra derecha y muestra también la sección habitual de cuenta, amigos y noticias. No altera las rutas ni los datos de perfil.
 
 Cambios únicamente de frontend/CSS; se deben validar visualmente en Windows después de que GitHub Actions complete la compilación.
+## Política de privacidad
+
+**Versión del 23 de noviembre de 2026.** Esta política describe cómo funciona esta distribución de EternalLauncher para Windows, una compilación independiente basada en Modrinth App.
+
+- **Cuenta de Minecraft.** Eternal abre el formulario de Microsoft en una ventana web para iniciar sesión. El flujo del launcher recibe un código OAuth y obtiene las credenciales de sesión necesarias para consultar el perfil, comprobar el acceso a Minecraft y renovar la sesión. Eternal no solicita ni guarda tu contraseña de Microsoft. Los tokens de acceso y renovación se guardan en la base SQLite local `app.db` sin cifrado propio del launcher. Protege esa carpeta y sus copias de seguridad. La cuenta opcional de Modrinth usa su propio flujo y sus propios tokens. [Inicio de sesión de Minecraft](https://support.modrinth.com/en/articles/9038231-minecraft-sign-in-issues) · [Privacidad de Microsoft](https://www.microsoft.com/es-es/privacy/privacystatement) · [Privacidad de Modrinth](https://modrinth.com/legal/privacy/)
+- **Datos locales.** Los perfiles, partidas, ajustes, credenciales de sesión, registros de diagnóstico y fondos se conservan en el equipo. Las imágenes de tu galería y del escritorio de Windows se procesan localmente. El parche de Eternal desactiva la analítica opcional y los reportes de errores de Sentry. Si compartes un diagnóstico por tu cuenta, revisa su contenido y evita adjuntar `app.db`, sus respaldos o cualquier token.
+- **Conexiones externas.** Microsoft, Xbox, Minecraft y Modrinth reciben las peticiones necesarias para el inicio de sesión, el catálogo, las descargas y otras funciones en línea que uses. El servidor de noticias y apariencia recibe las solicitudes de esos archivos, con datos de conexión como la dirección IP. Si activas Discord Rich Presence, Discord puede mostrar tu actividad y el nombre de la instancia. Puedes desactivar esa integración en **Ajustes → Privacidad**. [Privacidad de Discord](https://discord.com/privacy)
+- **Control y eliminación.** Desde el launcher puedes quitar tus cuentas guardadas y eliminar fondos de tu galería. También puedes revisar y revocar permisos en tu cuenta de Microsoft. Para borrar el perfil local completo, cierra Eternal, respalda las partidas que quieras conservar y elimina `%APPDATA%\com.eternal.launcher` y `%LOCALAPPDATA%\com.eternal.launcher`. La segunda carpeta incluye el almacenamiento del WebView y puede contener respaldos de la base en `Backups\app-db`. [Permisos de la cuenta Microsoft](https://account.live.com/consent/Manage)
+- **Contacto y cambios.** Para consultas de privacidad, contacta al responsable de la distribución de EternalLauncher por el canal por el que recibiste el instalador. Los cambios de esta política se publicarán en este README. Para datos que administra un servicio externo, consulta su propia política y sus canales de soporte.

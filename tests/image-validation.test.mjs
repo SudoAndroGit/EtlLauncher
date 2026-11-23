@@ -6,6 +6,15 @@ import {
   MAX_IMAGE_BYTES, inspectEternalImage,
 } from '../branding/image-validation.ts'
 
+test('the published wallpaper path points to a valid image', async () => {
+  const site = new URL('../public-news/', import.meta.url)
+  const { wallpaper } = JSON.parse(readFileSync(new URL('appearance.json', site), 'utf8'))
+  if (!wallpaper) return
+  const published = new URL('.' + new URL(wallpaper, 'https://example.test/').pathname, site)
+  const image = new Blob([readFileSync(published)])
+  await inspectEternalImage(image, published.pathname)
+})
+
 function pngHeader(width, height) {
   // Header + empty IDAT chunk + IEND: structurally valid chunk framing.
   // Decoder tests are separate; these test the pre-decode header inspector.

@@ -1,0 +1,28 @@
+POLÍTICA DE PRIVACIDAD DE ETERNALLAUNCHER
+
+EternalLauncher es una distribución independiente de Modrinth App. Este aviso describe el tratamiento de datos en la versión para Windows.
+
+Cuenta de Minecraft
+Microsoft proporciona el formulario de inicio de sesión. El launcher recibe un código OAuth y obtiene los tokens para consultar tu perfil, comprobar el acceso al juego y renovar la sesión. Eternal no solicita ni guarda tu contraseña de Microsoft. Los tokens se guardan en la base local app.db, sin cifrado propio del launcher. Una cuenta opcional de Modrinth usa su propio flujo.
+
+Datos locales y personalización
+Tus partidas, ajustes, credenciales de sesión, diagnósticos y fondos se guardan en el equipo. Las imágenes que eliges y el fondo de Windows se procesan localmente. La analítica opcional y los reportes de errores de Sentry están desactivados.
+
+Servicios externos
+Microsoft, Xbox, Minecraft y Modrinth reciben las solicitudes necesarias para las funciones en línea que uses. El servidor de noticias y apariencia recibe solicitudes con datos de conexión como la dirección IP. Cuando activas Discord Rich Presence, Discord puede mostrar tu actividad y el nombre de la instancia. Puedes desactivarlo en Ajustes, en la sección Privacidad.
+
+Tus opciones
+Puedes quitar tus cuentas y fondos desde Eternal y revisar los permisos de tu cuenta de Microsoft. Si decides borrar el perfil completo, cierra Eternal y respalda las partidas que quieras conservar antes de eliminar %APPDATA%\com.eternal.launcher y %LOCALAPPDATA%\com.eternal.launcher. Revisa tus diagnósticos antes de compartirlos y protege la base de datos y sus respaldos.
+
+Más información
+Contacta al responsable de la distribución por el canal donde recibiste EternalLauncher. El README del proyecto contiene la política completa y las referencias a las políticas de los servicios externos.
+https://github.com/WildMCs/EtlLauncher#política-de-privacidad
+https://www.microsoft.com/es-es/privacy/privacystatement
+https://modrinth.com/legal/privacy/
+https://discord.com/privacy
+
+El botón «Leído» confirma la lectura del aviso. Las funciones opcionales se configuran desde el launcher.
+
+LICENCIA GPL VERSIÓN 3
+
+El texto original de la licencia se incluye a continuación.
