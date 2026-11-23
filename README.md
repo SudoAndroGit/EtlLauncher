@@ -167,3 +167,15 @@ En **Run workflow**, marca **Publish a private GitHub Release after the build su
 - No hay firma comercial: Windows podría advertir sobre aplicaciones desconocidas.
 - Este es un trabajo derivado de Modrinth y continúa usando sus servicios y APIs. El logo personalizado es derivado de la marca original; su uso o distribución podría requerir permisos. **No lo presentes como un producto oficial**.
 - Las nuevas personalizaciones requieren verificar una compilación y su aspecto en Windows antes de considerarlas estables.
+
+
+## Pulido visual específico de Eternal (v4.4)
+
+El paso guardado `patches/ui_polish.py` se ejecuta después de los temas y **antes** de compilar: identifica los botones de Detener de las tarjetas de instancias (también las variantes antiguas), el recuadro de Añadir skin y las páginas de perfil de usuario. Si alguna estructura cambia en Modrinth, la compilación se detiene antes de publicar un instalador parcialmente modificado.
+
+- **Detener** conserva su comportamiento original, con degradado rojo y un borde rojo oscuro propio; los demás botones mantienen su apariencia.
+- La opción de **mostrar partículas con movimiento reducido** tiene un switch accesible con indicador de enfoque visible y la misma preferencia local de siempre.
+- **Skins** muestra bordes rosas de selección y enfoque dentro de la tarjeta, para que la lista virtualizada no los recorte.
+- **Perfiles de usuario** conserva las insignias y organizaciones en la barra derecha y muestra también la sección habitual de cuenta, amigos y noticias. No altera las rutas ni los datos de perfil.
+
+Cambios únicamente de frontend/CSS; se deben validar visualmente en Windows después de que GitHub Actions complete la compilación.
