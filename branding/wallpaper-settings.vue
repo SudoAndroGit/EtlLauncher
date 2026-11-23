@@ -180,10 +180,12 @@ function restoreDefault() {
 			<input
 				id="eternal-particle-force-motion"
 				v-model="forceParticleMotion"
+				class="eternal-particle-motion-input"
 				type="checkbox"
 				@change="updateParticleMotionOverride"
 			/>
-			<span>Mostrar partículas aunque Windows tenga activado el movimiento reducido</span>
+			<span class="eternal-particle-motion-track" aria-hidden="true"></span>
+			<span class="eternal-particle-motion-text">Mostrar partículas aunque Windows tenga activado el movimiento reducido</span>
 		</label>
 		<p class="eternal-wallpaper-hint">Las opciones manuales no se sobrescriben con la configuración remota. Por defecto se respeta la reducción de movimiento de Windows; puedes permitir estas animaciones solo en Eternal mediante la opción anterior.</p>
 	</section>
@@ -212,9 +214,77 @@ function restoreDefault() {
 </template>
 
 <style scoped>
-.eternal-particle-motion-override { display: flex; align-items: flex-start; gap: .75rem; margin-top: 1rem; color: var(--color-contrast); cursor: pointer; line-height: 1.45; font-size: .88rem; }
-.eternal-particle-motion-override input { flex: 0 0 auto; width: 18px; height: 18px; margin: 1px 0 0; cursor: pointer; accent-color: #edabc9; }
-.eternal-particle-motion-override input:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
+/* A real, accessible switch: the native checkbox remains focusable, but
+ * its browser-specific appearance cannot clash with the Sakura input styles. */
+.eternal-particle-motion-override {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  margin-top: 1rem;
+  color: var(--color-contrast);
+  cursor: pointer;
+  line-height: 1.45;
+  font-size: .88rem;
+}
+.eternal-particle-motion-input {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0 !important;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+.eternal-particle-motion-track {
+  position: relative;
+  display: block;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 28px;
+  box-sizing: border-box;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 221, 240, .22);
+  background: rgba(15, 13, 24, .57);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .18);
+  transition: background-color .16s ease, border-color .16s ease;
+}
+.eternal-particle-motion-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f5d4e5;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .25);
+  transition: transform .16s ease, background-color .16s ease;
+}
+.eternal-particle-motion-input:checked + .eternal-particle-motion-track {
+  background: #e693b9;
+  border-color: #f2b7d0;
+}
+.eternal-particle-motion-input:checked + .eternal-particle-motion-track::after {
+  transform: translateX(20px);
+  background: #fff;
+}
+.eternal-particle-motion-input:focus-visible + .eternal-particle-motion-track {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+}
+.eternal-particle-motion-text { flex: 1 1 auto; min-width: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .eternal-particle-motion-track,
+  .eternal-particle-motion-track::after { transition: none; }
+}
+@media (forced-colors: active) {
+  .eternal-particle-motion-track { border-color: ButtonText; background: Canvas; }
+  .eternal-particle-motion-track::after { background: ButtonText; }
+  .eternal-particle-motion-input:checked + .eternal-particle-motion-track { border-color: Highlight; background: Highlight; }
+  .eternal-particle-motion-input:checked + .eternal-particle-motion-track::after { background: HighlightText; }
+}
 .eternal-wallpaper-settings {
 	margin-top: 1.5rem;
 	padding: 1.25rem;
