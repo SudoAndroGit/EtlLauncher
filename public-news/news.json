@@ -9,6 +9,12 @@
       "date": "2026-11-22"
     },
     {
+      "id": "bienvenida",
+      "title": "¡Version 1.0!",
+      "body": "Versión inicial del launcher. ¡Gracias por instalarlo y bienvenido a la experiencia EtlLauncher!",
+      "date": "2026-11-22"
+    },
+    {
       "id": "sakura-glass",
       "title": "Temas",
       "body": "Personaliza tu launcher con nuestro tema de cristal rosa y una fotografía de fondo propia en ajustes!",
