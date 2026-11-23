@@ -11,6 +11,7 @@ type RemoteAppearance = { wallpaper?: string; particles: Exclude<ParticleChoice,
 
 const WALLPAPER_CHOICE_KEY = 'eternal.wallpaper.choice.v1'
 const PARTICLE_CHOICE_KEY = 'eternal.particles.choice.v1'
+const PARTICLE_MOTION_OVERRIDE_KEY = 'eternal.particles.ignore-reduced-motion.v1'
 const AVAILABLE_PARTICLES = new Set(['sakura', 'lava', 'otono', 'primavera', 'navidad', 'none'])
 const FALLBACK: RemoteAppearance = { particles: 'sakura' }
 let remote: RemoteAppearance = FALLBACK
@@ -34,6 +35,14 @@ export function getEternalParticleChoice(): ParticleChoice {
   const value = readSetting(PARTICLE_CHOICE_KEY)
   return value === 'default' || AVAILABLE_PARTICLES.has(value ?? '') ? value as ParticleChoice : 'default'
 }
+/** Explicit local opt-in. By default we respect Windows reduced-motion. */
+export function getEternalParticleMotionOverride(): boolean {
+  return readSetting(PARTICLE_MOTION_OVERRIDE_KEY) === 'true'
+}
+export function setEternalParticleMotionOverride(enabled: boolean): void {
+  saveSetting(PARTICLE_MOTION_OVERRIDE_KEY, enabled ? 'true' : 'false')
+  document.documentElement.dataset.eternalParticleMotionOverride = enabled ? 'true' : 'false'
+}
 function applyWallpaperChoice() {
   const root = document.documentElement
   const mode = getEternalWallpaperChoice()
@@ -48,7 +57,9 @@ function applyWallpaperChoice() {
 }
 function applyParticleChoice() {
   const mode = getEternalParticleChoice()
-  document.documentElement.dataset.eternalParticles = mode === 'default' ? remote.particles : mode
+  const root = document.documentElement
+  root.dataset.eternalParticles = mode === 'default' ? remote.particles : mode
+  root.dataset.eternalParticleMotionOverride = getEternalParticleMotionOverride() ? 'true' : 'false'
 }
 export function setEternalWallpaperChoice(mode: WallpaperChoice) {
   saveSetting(WALLPAPER_CHOICE_KEY, mode)
