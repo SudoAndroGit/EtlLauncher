@@ -1,12 +1,24 @@
 /**
- * Eternal's optional local background. Images are resized in the WebView and
- * saved as JPEG in localStorage: no file-system permissions or network upload.
+ * Eternal's local backgrounds live in IndexedDB. Existing JPEG and GIF
+ * preferences are still readable.
  */
 import { MAX_IMAGE_BYTES, validateEternalImage } from './eternal-image-validation'
 
-const KEY = 'eternal.wallpaper.v1'
+const LEGACY_JPEG_KEY = 'eternal.wallpaper.v1'
 const GIF_KEY = 'eternal.wallpaper.gif.v1'
-let activeGifUrl: string | null = null
+const GIF_DATABASE = 'eternal-animated-wallpaper'
+const WALLPAPER_STORE = 'wallpapers'
+const WALLPAPER_RECORD = 'wallpaper'
+const LEGACY_GIF_RECORD = 'current'
+const MAX_WALLPAPERS = 12
+const MAX_LIBRARY_BYTES = 96 * 1024 * 1024
+type WallpaperEntry = { id: string; name: string; file: Blob; thumbnail?: Blob }
+type WallpaperLibrary = { items: WallpaperEntry[]; activeId: string | null }
+let library: WallpaperLibrary = { items: [], activeId: null }
+let activeWallpaperUrl: string | null = null
+let storedWallpaper = false
+let restoration: Promise<void> | undefined
+let changingWallpaper = false
 const MAX_STORED_CHARS = 3_000_000
 const EFFECTS_KEY = 'eternal.wallpaper.effects.v2'
 const LEGACY_EFFECTS_KEY = 'eternal.wallpaper.effects.v1'
@@ -16,31 +28,25 @@ const DEFAULT_BLUR = 0
 const MAX_BLUR = 24
 const VALID_DATA_URL = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/
 
-function readStoredWallpaper(): string | null {
+function readLegacyJpeg(): string | null {
 	try {
-		const value = localStorage.getItem(KEY)
+		const value = localStorage.getItem(LEGACY_JPEG_KEY)
 		return value && value.length <= MAX_STORED_CHARS && VALID_DATA_URL.test(value) ? value : null
 	} catch {
 		return null
 	}
 }
 
-export function hasEternalWallpaper(): boolean {
-	try { return readStoredWallpaper() !== null || localStorage.getItem(GIF_KEY) === '1' }
-	catch { return readStoredWallpaper() !== null }
+export function hasRestoredEternalWallpaper(): boolean {
+	return storedWallpaper
+}
+
+export async function hasEternalWallpaper(): Promise<boolean> {
+	await (restoration ??= restoreStoredWallpaper())
+	return storedWallpaper
 }
 
 export function applyEternalWallpaper(): void {
-	const image = readStoredWallpaper()
-	if (image) {
-		document.documentElement.style.setProperty(
-			'--eternal-custom-wallpaper',
-			'url("' + image + '")',
-		)
-	} else {
-		document.documentElement.style.removeProperty('--eternal-custom-wallpaper')
-		try { if (localStorage.getItem(GIF_KEY) === '1') void restoreStoredGif() } catch { /* storage unavailable */ }
-	}
 	applyEternalWallpaperEffects()
 	applyEternalSidebarTransparency()
 }
@@ -143,139 +149,200 @@ export function setEternalSidebarTransparency(transparency: number): void {
 	renderEternalSidebarTransparency(value)
 }
 
-export async function setEternalWallpaper(file: File): Promise<void> {
-	// Validate extension, real signature, resolution, GIF frames and decoder
-	// before writing anything to localStorage / IndexedDB.
-	const verified = await validateEternalImage(file, file.name)
-	if (verified.mime === 'image/gif') {
-		// Animated GIFs cannot go through Canvas: it would flatten their frames.
-		// IndexedDB persists the original file without extra Tauri permissions.
-		const savedGif = new Blob([file], { type: 'image/gif' })
-		await storeGif(savedGif)
-		try {
-			localStorage.setItem(GIF_KEY, '1')
-			localStorage.removeItem(KEY)
-		} catch {
-			throw new Error('No se pudo guardar la referencia al GIF local.')
-		}
-		showGif(savedGif)
-		return
+export async function listEternalWallpapers() {
+	await hasEternalWallpaper()
+	return {
+		items: library.items.map(({ id, name, thumbnail }) => ({ id, name, thumbnail })),
+		activeId: library.activeId,
 	}
-	const objectUrl = URL.createObjectURL(file)
-	const image = new Image()
+}
+
+export async function addEternalWallpapers(files: File[]): Promise<void> {
+	await changeWallpaperLibrary(async () => {
+		if (!files.length) return
+		if (library.items.length + files.length > MAX_WALLPAPERS) {
+			throw new Error(`Puedes guardar hasta ${MAX_WALLPAPERS} fondos. Quita uno para agregar más.`)
+		}
+		const items = [...library.items]
+		let total = items.reduce((sum, entry) => sum + entry.file.size, 0)
+		for (const file of files) {
+			const { image, mime } = await validateEternalImage(file, file.name)
+			const saved = mime === 'image/gif' ? new Blob([file], { type: mime }) : await resizeWallpaper(image)
+			total += saved.size
+			if (total > MAX_LIBRARY_BYTES) throw new Error('La galería alcanza su límite de 96 MiB.')
+			const thumbnail = await resizeWallpaper(image, 160, 100)
+			items.push({ id: crypto.randomUUID(), name: file.name.slice(0, 160), file: saved, thumbnail })
+		}
+		const active = items[items.length - 1]
+		await saveLibrary({ items, activeId: active.id }, active.file)
+	})
+}
+
+export async function selectEternalWallpaper(id: string): Promise<void> {
+	await changeWallpaperLibrary(async () => {
+		const entry = library.items.find((item) => item.id === id)
+		if (!entry || (storedWallpaper && id === library.activeId)) return
+		await validateSavedWallpaper(entry.file)
+		await saveLibrary({ ...library, activeId: id }, entry.file)
+	})
+}
+
+export async function removeEternalWallpaper(id: string): Promise<void> {
+	await changeWallpaperLibrary(async () => {
+		const items = library.items.filter((item) => item.id !== id)
+		if (items.length === library.items.length) return
+		const activeId = library.activeId === id ? null : library.activeId
+		const updated = { items, activeId }
+		if (activeId === library.activeId) {
+			await writeWallpaper(updated)
+			library = updated
+		} else {
+			await saveLibrary(updated, null)
+		}
+	})
+}
+
+async function resizeWallpaper(image: HTMLImageElement, maxWidth = 1920, maxHeight = 1080): Promise<Blob> {
+	const scale = Math.min(1, maxWidth / image.naturalWidth, maxHeight / image.naturalHeight)
+	const canvas = document.createElement('canvas')
+	canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
+	canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
+	const context = canvas.getContext('2d')
+	if (!context) throw new Error('No se pudo procesar la imagen.')
+	context.fillStyle = '#211922'
+	context.fillRect(0, 0, canvas.width, canvas.height)
+	context.drawImage(image, 0, 0, canvas.width, canvas.height)
+	const compressed = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78))
+	if (!compressed?.size || compressed.type !== 'image/jpeg') throw new Error('No se pudo comprimir la imagen.')
+	return compressed
+}
+
+async function changeWallpaperLibrary(change: () => Promise<void>): Promise<void> {
+	if (changingWallpaper) throw new Error('Espera a que termine el cambio de fondo.')
+	changingWallpaper = true
 	try {
-		image.src = objectUrl
-		await image.decode()
-		if (!image.naturalWidth || !image.naturalHeight || image.naturalWidth > 16000 || image.naturalHeight > 16000) {
-			throw new Error('Las dimensiones de la imagen no son válidas.')
-		}
-		const scale = Math.min(1, 1920 / image.naturalWidth, 1080 / image.naturalHeight)
-		const canvas = document.createElement('canvas')
-		canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
-		canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
-		const context = canvas.getContext('2d')
-		if (!context) throw new Error('No se pudo procesar la imagen.')
-		context.fillStyle = '#211922'
-		context.fillRect(0, 0, canvas.width, canvas.height)
-		context.drawImage(image, 0, 0, canvas.width, canvas.height)
-		const compressed = canvas.toDataURL('image/jpeg', 0.78)
-		if (!VALID_DATA_URL.test(compressed) || compressed.length > MAX_STORED_CHARS) {
-			throw new Error('La imagen comprimida es demasiado grande; prueba otra fotografía.')
-		}
-		try {
-			localStorage.setItem(KEY, compressed)
-		} catch {
-			throw new Error('No hay espacio local para guardar la imagen.')
-		}
-		try { localStorage.removeItem(GIF_KEY) } catch { /* JPEG already saved */ }
-		void deleteStoredGif()
-		releaseGifUrl()
-		applyEternalWallpaper()
+		await hasEternalWallpaper()
+		await change()
 	} finally {
-		URL.revokeObjectURL(objectUrl)
+		changingWallpaper = false
 	}
 }
 
-export function resetEternalWallpaper(): void {
-	localStorage.removeItem(KEY)
-	localStorage.removeItem(GIF_KEY)
-	releaseGifUrl()
-	void deleteStoredGif()
-	applyEternalWallpaper()
+async function saveLibrary(updated: WallpaperLibrary, file: Blob | null): Promise<void> {
+	await writeWallpaper(updated)
+	library = updated
+	showStoredWallpaper(file)
 }
 
-
-function releaseGifUrl(): void {
-	if (activeGifUrl) URL.revokeObjectURL(activeGifUrl)
-	activeGifUrl = null
-}
-function showGif(file: Blob): void {
-	releaseGifUrl()
-	activeGifUrl = URL.createObjectURL(file)
-	document.documentElement.style.setProperty('--eternal-custom-wallpaper', `url("${activeGifUrl}")`)
+function showStoredWallpaper(file: Blob | null): void {
+	if (activeWallpaperUrl) URL.revokeObjectURL(activeWallpaperUrl)
+	activeWallpaperUrl = file ? URL.createObjectURL(file) : null
+	const style = document.documentElement.style
+	if (activeWallpaperUrl) style.setProperty('--eternal-custom-wallpaper', `url("${activeWallpaperUrl}")`)
+	else style.removeProperty('--eternal-custom-wallpaper')
+	storedWallpaper = file !== null
 }
 
-const GIF_DATABASE = 'eternal-animated-wallpaper'
-const GIF_STORE = 'wallpapers'
-function openGifDatabase(): Promise<IDBDatabase> {
+function openWallpaperDatabase(): Promise<IDBDatabase> {
 	return new Promise((resolve, reject) => {
-		if (!('indexedDB' in window)) { reject(new Error('IndexedDB no disponible')); return }
 		const request = indexedDB.open(GIF_DATABASE, 1)
 		request.onupgradeneeded = () => {
-			if (!request.result.objectStoreNames.contains(GIF_STORE)) request.result.createObjectStore(GIF_STORE)
+			request.result.createObjectStore(WALLPAPER_STORE)
 		}
 		request.onsuccess = () => resolve(request.result)
 		request.onerror = () => reject(request.error ?? new Error('No se pudo abrir el almacenamiento local'))
 	})
 }
-async function storeGif(file: Blob): Promise<void> {
-	const db = await openGifDatabase()
-	try {
-		await new Promise<void>((resolve, reject) => {
-			const tx = db.transaction(GIF_STORE, 'readwrite')
-			tx.objectStore(GIF_STORE).put(file, 'current')
-			tx.oncomplete = () => resolve()
-			tx.onerror = () => reject(tx.error ?? new Error('No se pudo guardar el GIF'))
-			tx.onabort = () => reject(tx.error ?? new Error('Almacenamiento del GIF cancelado'))
-		})
-	} catch {
-		throw new Error('No se pudo guardar el GIF (máximo 22 MB). Comprueba el espacio disponible.')
-	} finally {
-		db.close()
-	}
+
+async function readWallpaper(db: IDBDatabase, key: string): Promise<unknown> {
+	return new Promise((resolve, reject) => {
+		const request = db.transaction(WALLPAPER_STORE).objectStore(WALLPAPER_STORE).get(key)
+		request.onsuccess = () => resolve(request.result)
+		request.onerror = () => reject(request.error)
+	})
 }
-async function restoreStoredGif(): Promise<void> {
+
+async function writeWallpaper(updated: WallpaperLibrary): Promise<void> {
 	try {
-		const db = await openGifDatabase()
-		let file: unknown
+		const db = await openWallpaperDatabase()
 		try {
-			file = await new Promise((resolve, reject) => {
-				const tx = db.transaction(GIF_STORE, 'readonly')
-				const request = tx.objectStore(GIF_STORE).get('current')
-				request.onsuccess = () => resolve(request.result)
-				request.onerror = () => reject(request.error)
+			await new Promise<void>((resolve, reject) => {
+				const tx = db.transaction(WALLPAPER_STORE, 'readwrite')
+				const store = tx.objectStore(WALLPAPER_STORE)
+				store.put(updated, WALLPAPER_RECORD)
+				store.delete(LEGACY_GIF_RECORD)
+				tx.oncomplete = () => resolve()
+				tx.onabort = () => reject(tx.error)
 			})
 		} finally {
 			db.close()
 		}
-		if (!(file instanceof Blob) || file.type !== 'image/gif' || file.size > MAX_IMAGE_BYTES) return
-		await validateEternalImage(file, 'restored.gif')
-		if (readStoredWallpaper() !== null || localStorage.getItem(GIF_KEY) !== '1') return
-		showGif(file)
 	} catch {
-		// An unavailable GIF store is not a reason to block launcher startup.
+		throw new Error('No se pudo guardar el cambio de fondo. Comprueba el almacenamiento local.')
 	}
-}
-async function deleteStoredGif(): Promise<void> {
 	try {
-		const db = await openGifDatabase()
+		localStorage.removeItem(LEGACY_JPEG_KEY)
+		localStorage.removeItem(GIF_KEY)
+	} catch { /* the committed IndexedDB record takes precedence */ }
+}
+
+function isSavedWallpaper(file: unknown): file is Blob {
+	return file instanceof Blob && file.size > 0 && file.size <= MAX_IMAGE_BYTES &&
+		(file.type === 'image/gif' || file.type === 'image/jpeg')
+}
+
+async function validateSavedWallpaper(file: Blob): Promise<void> {
+	await validateEternalImage(file, file.type === 'image/gif' ? 'wallpaper.gif' : 'wallpaper.jpg')
+}
+
+function isWallpaperEntry(entry: unknown): entry is WallpaperEntry {
+	if (!entry || typeof entry !== 'object') return false
+	const item = entry as Partial<WallpaperEntry>
+	return typeof item.id === 'string' && typeof item.name === 'string' && isSavedWallpaper(item.file) &&
+		(item.thumbnail === undefined || (item.thumbnail instanceof Blob &&
+			item.thumbnail.type === 'image/jpeg' && item.thumbnail.size <= 100_000))
+}
+
+async function restoreStoredWallpaper(): Promise<void> {
+	let file: unknown
+	let legacyJpeg: string | null = null
+	try {
+		const db = await openWallpaperDatabase()
 		try {
-			await new Promise<void>((resolve, reject) => {
-				const tx = db.transaction(GIF_STORE, 'readwrite')
-				tx.objectStore(GIF_STORE).delete('current')
-				tx.oncomplete = () => resolve()
-				tx.onerror = () => reject(tx.error)
-			})
-		} finally { db.close() }
-	} catch { /* an orphaned GIF can be overwritten safely later */ }
+			file = await readWallpaper(db, WALLPAPER_RECORD)
+			if (file === undefined) {
+				legacyJpeg = readLegacyJpeg()
+				if (!legacyJpeg && localStorage.getItem(GIF_KEY) === '1') {
+					file = await readWallpaper(db, LEGACY_GIF_RECORD)
+				}
+			}
+		} finally {
+			db.close()
+		}
+	} catch {
+		if (file === undefined) legacyJpeg = readLegacyJpeg()
+	}
+	try {
+		if (legacyJpeg) {
+			const decoded = atob(legacyJpeg.slice('data:image/jpeg;base64,'.length))
+			const bytes = Uint8Array.from(decoded, (character) => character.charCodeAt(0))
+			file = new Blob([bytes], { type: 'image/jpeg' })
+		}
+		if (isSavedWallpaper(file)) {
+			library = { items: [{ id: 'previous', name: 'Fondo anterior', file }], activeId: 'previous' }
+		} else if (file && typeof file === 'object') {
+			const record = file as Partial<WallpaperLibrary>
+			if (Array.isArray(record.items)) {
+				const items = record.items.slice(0, MAX_WALLPAPERS).filter(isWallpaperEntry)
+				library = { items, activeId: typeof record.activeId === 'string' ? record.activeId : null }
+			}
+		}
+		const active = library.items.find((item) => item.id === library.activeId)
+		if (active) {
+			await validateSavedWallpaper(active.file)
+			showStoredWallpaper(active.file)
+		}
+	} catch {
+		// A missing or invalid saved image leaves the built-in fallback in place.
+	}
 }

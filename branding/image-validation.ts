@@ -206,7 +206,7 @@ function checkDimensions(mime: ImageMime, width: number, height: number): void {
     fail('La imagen excede 4096 px por lado o 16 millones de píxeles.')
   }
 }
-function detectedType(bytes: Uint8Array): ImageMime {
+export function detectedType(bytes: Uint8Array): ImageMime {
   if (bytes.length > 24 && ascii(bytes, 0, 8) === '\x89PNG\r\n\x1a\n') return 'image/png'
   if (bytes.length >= 4 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg'
   if (bytes.length >= 12 && ascii(bytes, 0, 4) === 'RIFF' && ascii(bytes, 8, 12) === 'WEBP') return 'image/webp'
@@ -214,7 +214,7 @@ function detectedType(bytes: Uint8Array): ImageMime {
   fail('Archivo rechazado: no es PNG, JPG, WebP ni GIF auténtico.')
 }
 
-async function decodeImage(file: Blob, expected: ValidatedImage): Promise<void> {
+async function decodeImage(file: Blob, expected: ValidatedImage): Promise<HTMLImageElement> {
   // The browser must also recognize it. Never decode before checking dimensions.
   const url = URL.createObjectURL(file)
   const image = new Image()
@@ -231,13 +231,14 @@ async function decodeImage(file: Blob, expected: ValidatedImage): Promise<void> 
     const matching = image.naturalWidth === expected.width && image.naturalHeight === expected.height
     const rotated = image.naturalWidth === expected.height && image.naturalHeight === expected.width
     if (!matching && !rotated) fail('Las dimensiones declaradas no coinciden con las decodificadas.')
+    return image
   } catch (error) {
+    image.removeAttribute('src')
     if (error instanceof Error && (error.message.includes('Tiempo de procesamiento') ||
       error.message.includes('dimensiones declaradas'))) throw error
     fail('No se pudo decodificar la imagen; podría estar dañada.')
   } finally {
     window.clearTimeout(timeout)
-    image.src = ''
     URL.revokeObjectURL(url)
   }
 }
@@ -279,8 +280,10 @@ export async function inspectEternalImage(file: Blob, filename: string): Promise
 }
 
 /** Full browser-side validation including an actual decoder pass. */
-export async function validateEternalImage(file: Blob, filename: string): Promise<ValidatedImage> {
+export async function validateEternalImage(
+  file: Blob, filename: string,
+): Promise<ValidatedImage & { image: HTMLImageElement }> {
   const result = await inspectEternalImage(file, filename)
-  await decodeImage(file, result)
-  return result
+  const image = await decodeImage(file, result)
+  return { ...result, image }
 }

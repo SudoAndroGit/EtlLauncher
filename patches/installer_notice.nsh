@@ -1,0 +1,5 @@
+!define MUI_LICENSEPAGE_BUTTON "Leído"
+!define MUI_LICENSEPAGE_TEXT_TOP "Lee la política de privacidad y la licencia de EternalLauncher."
+!define MUI_LICENSEPAGE_TEXT_BOTTOM "Pulsa «Leído» para continuar con la instalación."
+!define MUI_PAGE_HEADER_TEXT "Privacidad y licencia"
+!define MUI_PAGE_HEADER_SUBTEXT "Información sobre tus datos y la distribución de EternalLauncher"

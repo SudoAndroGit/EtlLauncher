@@ -135,6 +135,8 @@ def install_wallpaper() -> None:
 
 
 def install_news_config() -> None:
+    news = FRONTEND / "features/news"
+    shutil.copyfile(BASE / "branding/remote-content.ts", news / "eternal-remote-content.ts")
     cfg = json.loads((BASE / "branding/news-config.json").read_text(encoding="utf-8"))
     url = cfg.get("url", "")
     if not isinstance(url, str):
@@ -167,13 +169,22 @@ def install_news_config() -> None:
     else:
         print("Eternal news URL not configured; bundled welcome remains visible")
 
-    destination = FRONTEND / "features/news/eternal-news-config.json"
-    shutil.copyfile(BASE / "branding/news-config.json", destination)
+    shutil.copyfile(BASE / "branding/news-config.json", news / "eternal-news-config.json")
 
 
 def main() -> None:
     install_wallpaper()
     install_news_config()
+    native = ROOT / "apps/app/src"
+    shutil.copyfile(Path(__file__).with_name("windows_wallpaper.rs"), native / "eternal_wallpaper.rs")
+    replace_once(
+        native / "main.rs",
+        "        .invoke_handler(tauri::generate_handler![\n            initialize_state,",
+        "        .invoke_handler(tauri::generate_handler![\n"
+        "            eternal_wallpaper::read_windows_wallpaper,\n            initialize_state,",
+    )
+    with (native / "main.rs").open("a", encoding="utf-8") as main_rs:
+        main_rs.write("\nmod eternal_wallpaper;\n")
     print("Eternal: Appearance wallpaper picker and remote news config installed.")
 
 
