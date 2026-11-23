@@ -2,6 +2,12 @@
 
 **EternalLauncher** es una compilación privada y no oficial de Modrinth App con parches propios. No está afiliada a Rinth, Inc. El repositorio conserva por ahora el nombre histórico `WildMCs/EtlLauncher`.
 
+## Licencia y uso de IA
+
+Los parches y el código propio de EternalLauncher se distribuyen bajo la [GNU General Public License, versión 3 únicamente (GPL-3.0-only)](LICENSE). EternalLauncher se basa en [Modrinth App](https://github.com/modrinth/code/tree/v0.23.5/apps/app), de Rinth, Inc. Los componentes de terceros conservan sus licencias y avisos, y las marcas y recursos de Modrinth están sujetos a sus [condiciones de uso](https://github.com/modrinth/code/blob/v0.23.5/COPYING.md).
+
+Consulta cómo se usó IA durante el desarrollo en [AI-USAGE.md](AI-USAGE.md).
+
 ## Identidad
 
 - **Ejecutable/instalador:** `EternalLauncher`.
