@@ -1218,20 +1218,18 @@
  * by the shell's Sakura palette; these selectors target those real elements.
  */
 
-/* Keep the shell's effective navigation column and its panel geometry in sync.
- * Width = 112px, left inset = 16px, panel = 88px; 48px buttons fit between
- * the 19px inner paddings without clipping their circular active backgrounds.
- */
+/* Keep the navigation panel and its 24px of horizontal margins in the same column. */
 .app-grid-layout.app-grid-layout,
 .app-contents.app-contents {
-  --left-bar-width: 7rem !important;
+  --left-bar-width: calc(7rem - 5px) !important;
 }
 .app-grid-layout .app-grid-navbar {
-  width: 88px !important;
-  min-width: 88px !important;
-  max-width: 88px !important;
+  --eternal-nav-panel-width: calc(var(--left-bar-width) - 24px);
+  width: var(--eternal-nav-panel-width) !important;
+  min-width: var(--eternal-nav-panel-width) !important;
+  max-width: var(--eternal-nav-panel-width) !important;
   margin: 8px 8px 8px 16px !important;
-  padding: 13px 19px !important;
+  padding: 13px 16.5px !important;
   box-sizing: border-box !important;
   border-radius: 20px !important;
   align-items: center !important;

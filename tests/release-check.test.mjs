@@ -4,9 +4,14 @@ import test from 'node:test'
 import {
 	checkReleaseOnStartup,
 	checksEnabled,
+	eternalVersion,
 	newerRelease,
 	saveCheckPreference,
 } from '../branding/release-check.ts'
+
+const installedParts = eternalVersion.split('.').map(Number)
+const installedVersion = installedParts.join('.')
+const nextVersion = [installedParts[0], installedParts[1], installedParts[2] + 1].join('.')
 
 function publishedRelease(tag) {
 	return { tag_name: tag, draft: false, prerelease: false }
@@ -21,19 +26,19 @@ function memoryStorage() {
 }
 
 test('compares Eternal versions numerically and builds the link from the trusted repository', () => {
-	assert.equal(newerRelease(publishedRelease('eternallauncher-v1.2.1-build.118.1')), null)
-	assert.equal(newerRelease(publishedRelease('eternallauncher-v1.2.00')), null)
+	assert.equal(newerRelease(publishedRelease(`eternallauncher-v${installedVersion}-build.118.1`)), null)
+	assert.equal(newerRelease(publishedRelease(`eternallauncher-v${installedVersion}`)), null)
 	assert.equal(newerRelease(publishedRelease('eternal-v0.23.5-build.117.1')), null)
 	assert.equal(newerRelease({
-		...publishedRelease('eternallauncher-v1.2.10'),
+		...publishedRelease(`eternallauncher-v${nextVersion}`),
 		prerelease: true,
 	}), null)
 	assert.deepEqual(newerRelease({
-		...publishedRelease('eternallauncher-v1.2.10-build.119.1'),
+		...publishedRelease(`eternallauncher-v${nextVersion}-build.119.1`),
 		html_url: 'https://example.test/',
 	}), {
-		version: '1.2.10',
-		url: 'https://github.com/Wildlx3/EtlLauncher/releases/tag/eternallauncher-v1.2.10-build.119.1',
+		version: nextVersion,
+		url: `https://github.com/Wildlx3/EtlLauncher/releases/tag/eternallauncher-v${nextVersion}-build.119.1`,
 	})
 })
 
@@ -42,14 +47,14 @@ test('shares one startup request even when the title bar mounts again', async ()
 	const storage = memoryStorage()
 	const load = async () => {
 		loads++
-		return publishedRelease('eternallauncher-v1.2.02')
+		return publishedRelease(`eternallauncher-v${nextVersion}`)
 	}
 	const results = await Promise.all([
 		checkReleaseOnStartup(storage, load),
 		checkReleaseOnStartup(storage, load),
 	])
 	assert.equal(loads, 1)
-	assert.equal(results[0].version, '1.2.02')
+	assert.equal(results[0].version, nextVersion)
 	assert.deepEqual(results[0], results[1])
 })
 
