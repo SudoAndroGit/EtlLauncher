@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import base64
 import re
+import shutil
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -20,6 +21,62 @@ def replace_once(path: Path, original: str, updated: str) -> None:
     if count != 1:
         raise RuntimeError(f"Expected one occurrence in {path}: {original[:70]!r}; found {count}")
     path.write_text(contents.replace(original, updated, 1), encoding="utf-8")
+
+
+def install_release_notice() -> None:
+    feature = FRONTEND / "features/eternal-updates"
+    feature.mkdir(parents=True, exist_ok=True)
+    for filename in ("eternal-version.json", "release-check.ts", "release-notice.vue"):
+        shutil.copyfile(PROJECT / "branding" / filename, feature / filename)
+
+    action_bar = FRONTEND / "app/shell/title-bar/action-bar.vue"
+    replace_once(
+        action_bar,
+        "import AppUpdateButton from '@/components/ui/app-update-button/index.vue'",
+        "import EternalReleaseNotice from '@/features/eternal-updates/release-notice.vue'",
+    )
+    replace_once(action_bar, "<AppUpdateButton />", "<EternalReleaseNotice />")
+
+    behavior = FRONTEND / "features/settings/display/behavior-settings.vue"
+    replace_once(
+        behavior,
+        "import { onBeforeUnmount, onMounted } from 'vue'",
+        "import { onBeforeUnmount, onMounted, ref } from 'vue'",
+    )
+    replace_once(
+        behavior,
+        "const appSettings = useAppSettings()",
+        "import { checksEnabled, saveCheckPreference } from '@/features/eternal-updates/release-check'\n\n"
+        "const checkEternalUpdates = ref(checksEnabled(window.localStorage))\n"
+        "function setCheckEternalUpdates(enabled: boolean) {\n"
+        "\tsaveCheckPreference(window.localStorage, enabled)\n"
+        "\tcheckEternalUpdates.value = enabled\n"
+        "}\n\n"
+        "const appSettings = useAppSettings()",
+    )
+    replace_once(
+        behavior,
+        '\t\t\t\t<Toggle id="minimize-launcher" v-model="current.minimizeApp" />\n\t\t\t</div>',
+        '\t\t\t\t<Toggle id="minimize-launcher" v-model="current.minimizeApp" />\n\t\t\t</div>\n'
+        """
+			<div class="flex items-center justify-between gap-4">
+				<div>
+					<h3 id="eternal-updates-label" class="m-0 text-lg font-semibold text-contrast">
+						Buscar actualizaciones al abrir el lanzador
+					</h3>
+					<p id="eternal-updates-description" class="m-0 mt-1">
+						Consulta GitHub una vez al iniciar Eternal y avisa si hay una nueva versión.
+					</p>
+				</div>
+				<Toggle
+					id="eternal-check-updates"
+					:model-value="checkEternalUpdates"
+					aria-labelledby="eternal-updates-label"
+					aria-describedby="eternal-updates-description"
+					@update:model-value="setCheckEternalUpdates"
+				/>
+			</div>""",
+    )
 
 
 def main() -> None:
@@ -126,24 +183,27 @@ def main() -> None:
     splash.write_text(new, encoding="utf-8")
 
     settings = FRONTEND / "features/settings/app-settings-modal/index.vue"
-    replace_once(settings, "defaultMessage: 'Modrinth App {version}'", "defaultMessage: 'Eternal {version}'")
     replace_once(
         settings,
-        "{{ formatMessage(messages.appVersion, { version: appInfo.version }) }}",
-        "Eternal {{ appInfo.version }}",
+        "formatMessage(messages.appVersion, { version: appInfo.version })",
+        "formatMessage(messages.appVersion, { version: eternalVersion })",
     )
+    replace_once(settings, "defaultMessage: 'Modrinth App {version}'", "defaultMessage: 'EternalLauncher v{version}'")
+    replace_once(settings, "id: 'app.settings.app-version'", "id: 'eternal.settings.app-version'")
     replace_once(settings, "\tModrinthIcon,\n", "")
     replace_once(
         settings,
         "import { useAppSettings } from '@/composables/use-app-settings.ts'",
         "import eternalLogo from '@/assets/eternal-logo.png'\n"
-        "import { useAppSettings } from '@/composables/use-app-settings.ts'",
+        "import { useAppSettings } from '@/composables/use-app-settings.ts'\n"
+        "import { eternalVersion } from '@/features/eternal-updates/release-check'",
     )
     replace_once(
         settings,
         '<ModrinthIcon aria-hidden="true" class="w-6 h-6" />',
         '<img :src="eternalLogo" alt="" class="w-6 h-6 object-contain" />',
     )
+    install_release_notice()
 
     # Hide only the subscription upsell from the account dropdown; keep all
     # account handling, subscriptions, authentication and server APIs intact.
