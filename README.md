@@ -36,7 +36,7 @@ El panel izquierdo ahora tiene una **columna de 112 px y una barra Sakura de 88 
 
 En **Ajustes → Apariencia → Fondo de Eternal**, los modos se ofrecen como **tres botones**: **Sincronizado**, **Sakura** y **Personalizado**. Solo al seleccionar Personalizado aparece la opción de elegir/cambiar JPG, PNG, WebP o GIF; la elección sigue guardándose localmente. Los fondos mantienen el filtro de seguridad de **22 MiB** y los límites de resolución. El ajuste de partículas muestra **Sincronizado** en lugar de «Predeterminado (sincronizado)».
 
-Las partículas se montan desde `branding/particles.vue` mediante Vue Teleport a una capa decorativa sobre Inicio (no dentro de las capas recortables del viewport). No usan observadores temporales ni capturan clics; continúan desactivadas cuando se elige esa opción o cuando el sistema reduce movimiento.
+Las partículas se montan desde `branding/particles.vue` mediante Vue Teleport a una capa decorativa sobre Inicio (no dentro de las capas recortables del viewport). No usan observadores temporales ni capturan clics. Se muestran **22 partículas**; la opción Lava utiliza gotas luminosas con caída propia, sin el giro de los pétalos. Por defecto se respeta la reducción de movimiento de Windows, pero el usuario puede activar la casilla **«Mostrar partículas aunque Windows tenga activado el movimiento reducido»** en Ajustes → Apariencia. Esta elección solo afecta a Eternal, se almacena localmente en `eternal.particles.ignore-reduced-motion.v1` y **nunca** reactiva el modo «Desactivadas» ni anula los colores forzados de accesibilidad.
 
 ## Fondo personalizado
 
