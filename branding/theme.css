@@ -1516,3 +1516,55 @@ body > .eternal-particles-layer .eternal-particle {
   background: #f7f5f7 !important;
   border-color: #ddd5dd !important;
 }
+
+
+/* === Eternal Glass v4.3 — opt-in motion and lava droplets === */
+/* 22 elements are generated in particles.vue. Lava must NOT inherit the
+ * spinning Sakura-petal keyframes: molten droplets remain upright, descend
+ * a little faster, and glow without changing any other seasonal theme.
+ */
+:root[data-eternal-particles="lava"] body > .eternal-particles-layer.eternal-particles-fixed .eternal-particle {
+  width: calc(var(--particle-size) * .85);
+  height: calc(var(--particle-size) * 1.55);
+  background: radial-gradient(ellipse at 37% 62%, #fff1ad 0%, #ffc04d 24%, #ff7728 55%, #d82e1c 85%, #a41d15 100%) !important;
+  /* Pointed at the top, wide and rounded below: a falling molten drop. */
+  clip-path: polygon(50% 0%, 64% 17%, 81% 39%, 92% 59%, 90% 78%, 77% 93%, 50% 100%, 23% 93%, 10% 78%, 8% 59%, 19% 39%, 36% 17%);
+  border-radius: 0;
+  opacity: .84;
+  box-shadow: none;
+  filter: drop-shadow(0 0 4px rgba(252, 106, 28, .55));
+  animation: eternal-lava-fall var(--lava-duration, 11s) cubic-bezier(.35,.05,.65,1) var(--particle-delay) infinite;
+}
+:root[data-eternal-particles="lava"] body > .eternal-particles-layer.eternal-particles-fixed .eternal-particle::after {
+  content: '';
+  position: absolute;
+  left: 29%;
+  top: 53%;
+  width: 25%;
+  height: 24%;
+  border-radius: 50%;
+  background: rgba(255, 244, 176, .60);
+}
+@keyframes eternal-lava-fall {
+  from { transform: translate3d(0, -12vh, 0); }
+  to { transform: translate3d(var(--lava-drift, 16px), 110vh, 0); }
+}
+
+/* Explicit preference inside Eternal can opt back into the small seasonal
+ * effect without changing Windows accessibility settings for other apps.
+ * No override is applied for high-contrast / forced-color accessibility.
+ */
+@media (prefers-reduced-motion: reduce) and (forced-colors: none) {
+  :root[data-eternal-particle-motion-override="true"]:not([data-eternal-particles="none"])
+    body > .eternal-particles-layer.eternal-particles-fixed {
+    display: block !important;
+  }
+  :root[data-eternal-particle-motion-override="true"]:not([data-eternal-particles="none"])
+    body > .eternal-particles-layer.eternal-particles-fixed .eternal-particle {
+    animation: eternal-gentle-fall var(--particle-duration) linear var(--particle-delay) infinite !important;
+  }
+  :root[data-eternal-particle-motion-override="true"][data-eternal-particles="lava"]
+    body > .eternal-particles-layer.eternal-particles-fixed .eternal-particle {
+    animation: eternal-lava-fall var(--lava-duration, 11s) cubic-bezier(.35,.05,.65,1) var(--particle-delay) infinite !important;
+  }
+}
